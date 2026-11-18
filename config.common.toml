@@ -21,7 +21,8 @@ reasoning_effort = "low"
 preset = "mimo"
 
 # 想改用 OpenRouter：把上面的 preset 改成 "openrouter"。
-# 模型预设里已包含 microsoft/mai-transcribe-2；想显式写可以取消下一行注释。
+# 默认模型：microsoft/mai-transcribe-2
+# 要更换模型时，取消下一行注释并修改。
 # model = "microsoft/mai-transcribe-2"
 
 [translation]
