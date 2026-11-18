@@ -19,6 +19,7 @@
 
 - `config.toml`：由 `config.common.toml` 生成，默认小米 MiMo + DeepSeek，通常不用改
 - `config.full.toml`：完整参数；复制覆盖 `config.toml` 后行为不变
+- `.env`：空白模板，预置 `ASR_API_KEY=` 和 `LLM_API_KEY=`
 - `docs/install.md`：配置和启动器说明
 
 `--variant base` 或 `--variant ffmpeg` 可以只构建其中一个；`--refresh` 会重新下载
@@ -57,12 +58,12 @@ autobuild-2026-11-17-12-40 / ffmpeg-n8.1.3-35-gf1acb0a266-win64-lgpl-8.1.zip
 ## 发布
 
 ```powershell
-git tag v0.2.0
-git push origin v0.2.0
-gh release create v0.2.0 dist\SubForge-0.2.0-windows-x64-portable.zip `
-  dist\SubForge-0.2.0-windows-x64-portable-ffmpeg.zip `
-  dist\SubForge-0.2.0-windows-x64-portable-ffmpeg.7z `
-  --title "SubForge 0.2.0" --notes "ASR 预设、DeepSeek 默认配置、思考等级"
+git tag v0.2.1
+git push origin v0.2.1
+gh release create v0.2.1 dist\SubForge-0.2.1-windows-x64-portable.zip `
+  dist\SubForge-0.2.1-windows-x64-portable-ffmpeg.zip `
+  dist\SubForge-0.2.1-windows-x64-portable-ffmpeg.7z `
+  --title "SubForge 0.2.1" --notes "ASR 预设、DeepSeek 默认配置、思考等级"
 ```
 
-`v0.2.0` 和产物文件名里的版本要与 `pyproject.toml` 一致。
+`v0.2.1` 和产物文件名里的版本要与 `pyproject.toml` 一致。

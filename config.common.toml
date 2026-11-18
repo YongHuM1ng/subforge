@@ -1,7 +1,7 @@
 # SubForge 默认配置
 #
 # 默认：小米 MiMo 识别 + DeepSeek 官方翻译。
-# 在 .env 写：
+# 在包内 .env 填写：
 #   ASR_API_KEY=...          # 当前识别服务的 Key（默认小米 MiMo）
 #   LLM_API_KEY=...          # DeepSeek 的 Key
 #

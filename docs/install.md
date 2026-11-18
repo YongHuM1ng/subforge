@@ -94,8 +94,10 @@ GitHub Releases 提供两种便携包：
 | ASR（默认小米 MiMo） | 项目根目录 `.env` 的 `ASR_API_KEY` | `ASR_API_KEY` |
 | 翻译（默认 DeepSeek） | 项目根目录 `.env` 的 `LLM_API_KEY` | `LLM_API_KEY` |
 
-- ASR 第一次运行时会在控制台提示粘贴 Key，输入时不显示，并自动写入 `.env`。
+- 便携包已经自带空白 `.env`，直接用记事本填写 `ASR_API_KEY` 和 `LLM_API_KEY`。
+- 小米 MiMo Key 在 [platform.xiaomimimo.com/console/api-keys](https://platform.xiaomimimo.com/console/api-keys) 创建。
 - DeepSeek Key 在 [platform.deepseek.com/api_keys](https://platform.deepseek.com/api_keys) 创建。
+- ASR 第一次运行时如果 `ASR_API_KEY` 为空，会在控制台提示粘贴 Key，输入时不显示，并自动写入 `.env`。
 - 换用其他识别服务时，默认仍然从 `.env` 的 `ASR_API_KEY` 读 Key，只需要换 Key 的值；
   如需使用别的变量名，再改 `[asr] api_key_env`。
 - 翻译工具启动时会自动读取项目根目录的 `.env`；已存在的环境变量优先。

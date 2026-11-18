@@ -14,23 +14,23 @@
 2. **配置两个 Key**
 
    便携包里的 `config.toml` 已经是默认配置：**小米 MiMo 识别 + DeepSeek 官方翻译**，
-   **这个文件不用改**。只需要在解压目录新建 `.env`：
+   **这个文件不用改**。包里已经带一个空白的 `.env`，用记事本打开填入：
 
    | 写入 `.env` 的变量 | 用途 | 填什么 |
    |---|---|---|
    | `ASR_API_KEY` | 语音识别 | 当前识别服务的 Key（默认小米 MiMo） |
    | `LLM_API_KEY` | 翻译 | DeepSeek 的 Key |
 
-   - 小米 MiMo Key：到小米 MiMo 控制台创建。
+   - 小米 MiMo Key：到 [platform.xiaomimimo.com/console/api-keys](https://platform.xiaomimimo.com/console/api-keys) 创建。
    - DeepSeek Key：到 [platform.deepseek.com/api_keys](https://platform.deepseek.com/api_keys) 创建。
-   - 用记事本新建文件，文件名填 `.env`，保存类型选“所有文件”，内容：
+   - `.env` 内容：
 
      ```ini
      ASR_API_KEY=你的小米Key
      LLM_API_KEY=你的DeepSeekKey
      ```
 
-   `.env` 在资源管理器里可能是隐藏的，不用管，程序会自动读取。
+   保存后程序会自动读取。
 
    - 只做识别：只填 `ASR_API_KEY`，拖到 `1_视频转字幕.bat`。第一次识别时如果
      `.env` 里没有 Key，程序也会提示输入并自动保存。

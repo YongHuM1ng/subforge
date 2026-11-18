@@ -198,13 +198,20 @@ def copy_project(staging: Path) -> None:
     # 便携包放默认配置；完整配置放根目录，默认值与 config.toml 相同。
     shutil.copy2(ROOT / "config.common.toml", staging / "config.toml")
     shutil.copy2(ROOT / "config.full.toml", staging / "config.full.toml")
+    (staging / ".env").write_text(
+        "# 填入你的 API Key；不要提交或分享这个文件\n"
+        "ASR_API_KEY=\n"
+        "LLM_API_KEY=\n",
+        encoding="utf-8",
+    )
     (staging / "首次使用.txt").write_text(
         "SubForge 便携版\n"
         "================\n\n"
         "默认：小米 MiMo 识别 + DeepSeek 官方翻译。\n\n"
-        "1. 到 DeepSeek 开放平台创建 Key：https://platform.deepseek.com/api_keys\n"
-        "   （小米 MiMo 的 Key 请按小米控制台创建）\n"
-        "2. 在 .env 写两个 Key：\n"
+        "1. 创建 Key：\n"
+        "   小米 MiMo：https://platform.xiaomimimo.com/console/api-keys\n"
+        "   DeepSeek：https://platform.deepseek.com/api_keys\n"
+        "2. 用记事本打开 .env，填入：\n"
         "   ASR_API_KEY=...          # 默认小米 MiMo 的 Key\n"
         "   LLM_API_KEY=...          # DeepSeek Key\n"
         "3. 双击启动器，把视频/字幕拖进去。\n\n"
