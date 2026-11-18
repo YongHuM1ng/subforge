@@ -18,7 +18,8 @@
 ## 包内配置
 
 - `config.toml`：由 `config.common.toml` 生成，默认小米 MiMo + DeepSeek，通常不用改
-- `docs/config-reference.toml`：`config.toml.example` 的完整参数副本
+- `config.full.toml`：完整参数；复制覆盖 `config.toml` 后行为不变
+- `docs/install.md`：配置和启动器说明
 
 `--variant base` 或 `--variant ffmpeg` 可以只构建其中一个；`--refresh` 会重新下载
 Python、aiohttp 轮子和 ffmpeg。

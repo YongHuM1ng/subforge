@@ -195,9 +195,9 @@ def copy_project(staging: Path) -> None:
     for item in (ROOT / "docs").iterdir():
         if item.is_file() and item.name != "review.md":
             shutil.copy2(item, docs / item.name)
-    # 便携包放默认配置；完整参数参考放进 docs。
+    # 便携包放默认配置；完整配置放根目录，默认值与 config.toml 相同。
     shutil.copy2(ROOT / "config.common.toml", staging / "config.toml")
-    shutil.copy2(ROOT / "config.toml.example", docs / "config-reference.toml")
+    shutil.copy2(ROOT / "config.full.toml", staging / "config.full.toml")
     (staging / "首次使用.txt").write_text(
         "SubForge 便携版\n"
         "================\n\n"
@@ -210,7 +210,9 @@ def copy_project(staging: Path) -> None:
         "3. 双击启动器，把视频/字幕拖进去。\n\n"
         "换翻译服务：改 config.toml 的 [api] endpoint / model，\n"
         "            把该服务的 Key 写到 .env 的 LLM_API_KEY。\n"
-        "完整参数参考：docs\\config-reference.toml 或 docs\\install.md。\n\n"
+        "想要完整参数：用 config.full.toml 覆盖 config.toml。\n"
+        "            默认值与 config.toml 完全一样，换过去行为不变。\n"
+        "详细说明：docs\\install.md。\n\n"
         "如果下载的是不带 ffmpeg 的包，请安装 ffmpeg 到 PATH，\n"
         "或把 ffmpeg.exe 放到 tools\\ffmpeg\\bin。\n",
         encoding="utf-8",
