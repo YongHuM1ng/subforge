@@ -21,14 +21,10 @@ reasoning_effort = "low"
 preset = "mimo"
 
 # 想改用 OpenRouter：注释掉上面的 [asr] 块，取消下面的注释。
+# Key 仍写在 .env 的 ASR_API_KEY。
 # [asr]
-# protocol = "transcriptions"
-# api_url = "https://openrouter.ai/api/v1/audio/transcriptions"
+# preset = "openrouter"
 # model = "microsoft/mai-transcribe-2"
-# api_key_env = "ASR_API_KEY"
-# api_key_header = "Authorization"
-# api_key_prefix = "Bearer "
-# timestamps = "word"
 
 [translation]
 # 目标语言

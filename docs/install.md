@@ -120,6 +120,16 @@ GitHub Releases 提供两种便携包：
 
 所有预设默认都从 `.env` 的 `ASR_API_KEY` 读取 Key；切换 preset 时只需要换 Key 的值。
 
+例如切到 OpenRouter：
+
+```toml
+[asr]
+preset = "openrouter"
+model = "microsoft/mai-transcribe-2"
+```
+
+`.env` 里仍然只需 `ASR_API_KEY`；接口地址、协议、鉴权头都由预设处理。
+
 ```toml
 [asr]
 preset = "mimo"
