@@ -9,6 +9,7 @@ import threading
 import time
 import urllib.error
 import urllib.request
+import uuid
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
@@ -47,7 +48,68 @@ def _opener() -> urllib.request.OpenerDirector:
     return urllib.request.build_opener(urllib.request.ProxyHandler({}))
 
 
-def api_transcribe(wav_path: Path, api_key: str, mode: int) -> dict:
+def _auth_headers(api_key: str) -> dict[str, str]:
+    headers = {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+    }
+    if config.API_KEY_HEADER:
+        headers[config.API_KEY_HEADER] = f"{config.API_KEY_PREFIX}{api_key}"
+    return headers
+
+
+def _post(url: str, data: bytes, headers: dict[str, str]) -> dict:
+    req = urllib.request.Request(url, data=data, method="POST", headers=headers)
+    try:
+        with _opener().open(req, timeout=600) as resp:
+            return json.loads(resp.read().decode("utf-8", "replace"))
+    except urllib.error.HTTPError as e:
+        raise ApiError(e.code, e.read().decode("utf-8", "replace")) from e
+    except urllib.error.URLError as e:
+        raise ApiError(0, str(e.reason)) from e
+
+
+def _post_json(url: str, payload: dict, headers: dict[str, str]) -> dict:
+    return _post(url, json.dumps(payload).encode("utf-8"), headers)
+
+
+def _openai_multipart(wav_path: Path, api_key: str, mode: int) -> tuple[bytes, dict[str, str]]:
+    """标准 OpenAI /audio/transcriptions 使用 multipart/form-data。"""
+    boundary = "----SubForge" + uuid.uuid4().hex
+    chunks: list[bytes] = []
+
+    def field(name: str, value: str) -> None:
+        chunks.append(
+            (f"--{boundary}\r\n"
+             f'Content-Disposition: form-data; name="{name}"\r\n\r\n'
+             f"{value}\r\n").encode()
+        )
+
+    field("model", config.MODEL)
+    if mode >= 1:
+        field("response_format", "verbose_json")
+    if mode >= 2:
+        field("timestamp_granularities[]", "word")
+    if config.LANGUAGE:
+        field("language", config.LANGUAGE)
+    chunks.append(
+        (f"--{boundary}\r\n"
+         f'Content-Disposition: form-data; name="file"; filename="{wav_path.name}"\r\n'
+         "Content-Type: audio/wav\r\n\r\n").encode()
+        + wav_path.read_bytes() + b"\r\n"
+    )
+    chunks.append(f"--{boundary}--\r\n".encode())
+    headers = _auth_headers(api_key)
+    headers["Content-Type"] = f"multipart/form-data; boundary={boundary}"
+    return b"".join(chunks), headers
+
+
+def _api_transcribe_openai(wav_path: Path, api_key: str, mode: int) -> dict:
+    body, headers = _openai_multipart(wav_path, api_key, mode)
+    return _post(config.API_URL, body, headers)
+
+
+def _api_transcribe_transcriptions(wav_path: Path, api_key: str, mode: int) -> dict:
     """mode 2 = verbose_json + 词级时间戳；1 = 仅 verbose_json；0 = 纯文本。"""
     payload = {
         "model": config.MODEL,
@@ -60,24 +122,97 @@ def api_transcribe(wav_path: Path, api_key: str, mode: int) -> dict:
         payload["response_format"] = "verbose_json"
     if mode >= 2:
         payload["timestamp_granularities"] = ["word"]
-    req = urllib.request.Request(
-        config.API_URL,
-        data=json.dumps(payload).encode("utf-8"),
-        method="POST",
-        headers={
-            "Authorization": f"Bearer {api_key}",
-            "Content-Type": "application/json",
-            "Accept": "application/json",
-            "X-Title": "asr2srt",
-        },
-    )
-    try:
-        with _opener().open(req, timeout=600) as resp:
-            return json.loads(resp.read().decode("utf-8", "replace"))
-    except urllib.error.HTTPError as e:
-        raise ApiError(e.code, e.read().decode("utf-8", "replace")) from e
-    except urllib.error.URLError as e:
-        raise ApiError(0, str(e.reason)) from e
+    headers = _auth_headers(api_key)
+    headers["X-Title"] = "asr2srt"
+    return _post_json(config.API_URL, payload, headers)
+
+
+def _content_text(content) -> str:
+    if isinstance(content, str):
+        text = content.strip()
+        if text.startswith("{"):
+            try:
+                obj = json.loads(text)
+            except ValueError:
+                pass
+            else:
+                if isinstance(obj, dict):
+                    for key in ("text", "transcript", "content"):
+                        value = obj.get(key)
+                        if isinstance(value, str):
+                            return value.strip()
+        return content.strip()
+    if isinstance(content, dict):
+        for key in ("text", "transcript", "content"):
+            value = content.get(key)
+            if isinstance(value, str):
+                return value.strip()
+    if isinstance(content, list):
+        parts = []
+        for item in content:
+            if isinstance(item, dict) and isinstance(item.get("text"), str):
+                parts.append(item["text"])
+        return "".join(parts).strip()
+    return ""
+
+
+def _extract_chat_text(data: dict) -> str:
+    choices = data.get("choices")
+    if isinstance(choices, list) and choices and isinstance(choices[0], dict):
+        choice = choices[0]
+        message = choice.get("message")
+        if isinstance(message, dict):
+            audio = message.get("audio")
+            if isinstance(audio, dict) and isinstance(audio.get("transcript"), str):
+                return audio["transcript"].strip()
+            text = _content_text(message.get("content"))
+            if text:
+                return text
+        if isinstance(choice.get("text"), str):
+            return choice["text"].strip()
+    for key in ("text", "transcript"):
+        value = data.get(key)
+        if isinstance(value, str):
+            return value.strip()
+    return ""
+
+
+def _api_transcribe_chat(wav_path: Path, api_key: str) -> dict:
+    """OpenAI-compatible Chat Completions ASR：音频以 base64 放进 messages。"""
+    audio = base64.b64encode(wav_path.read_bytes()).decode("ascii")
+    if config.AUDIO_FORMAT == "base64":
+        input_audio = {"data": audio, "format": "wav"}
+    else:
+        input_audio = {"data": f"data:audio/wav;base64,{audio}"}
+    payload = {
+        "model": config.MODEL,
+        "stream": False,
+        "messages": [{
+            "role": "user",
+            "content": [{
+                "type": "input_audio",
+                "input_audio": input_audio,
+            }],
+        }],
+    }
+    if config.LANGUAGE:
+        payload["asr_options"] = {"language": config.LANGUAGE}
+    data = _post_json(config.API_URL, payload, _auth_headers(api_key))
+    out = {"text": _extract_chat_text(data)}
+    if isinstance(data.get("usage"), dict):
+        out["usage"] = data["usage"]
+    if config.LANGUAGE:
+        out["language"] = config.LANGUAGE
+    return out
+
+
+def api_transcribe(wav_path: Path, api_key: str, mode: int) -> dict:
+    """按 [asr] protocol 选择请求方式。"""
+    if config.PROTOCOL == "chat_completions":
+        return _api_transcribe_chat(wav_path, api_key)
+    if config.PROTOCOL == "openai_transcriptions":
+        return _api_transcribe_openai(wav_path, api_key, mode)
+    return _api_transcribe_transcriptions(wav_path, api_key, mode)
 
 
 class Gate:

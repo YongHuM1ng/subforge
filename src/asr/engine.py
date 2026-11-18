@@ -92,7 +92,8 @@ def _process(src: Path, api_key: str, opts: dict, wd: Path) -> ProcessResult:
 
     wavs = slice_wav(wav_path, chunks, wd, "c")
 
-    log(f"[模型] ASR：{config.MODEL}（时间戳 {config.TIMESTAMPS}，并发 {opts['workers']}）")
+    log(f"[模型] ASR：{config.MODEL}（预设 {config.PRESET}，协议 {config.PROTOCOL}，"
+        f"时间戳 {config.TIMESTAMPS}，并发 {opts['workers']}）")
     t0 = time.time()
 
     results = run_chunks(wavs, chunks, api_key, opts["workers"],

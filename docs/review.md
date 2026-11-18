@@ -101,10 +101,10 @@ cache.clear()          # 上一行成功后才清缓存
 `src/asr/keys.py:37`
 
 ```python
-if line.strip().startswith("OPENROUTER_API_KEY"):
+if line.strip().startswith("ASR_API_KEY"):
 ```
 
-如果用户 `.env` 里有 `OPENROUTER_API_KEY_BACKUP=...`，这一行会被整行替换成 `OPENROUTER_API_KEY=<new>`，备份键被静默破坏。应改为按 `=` 切分后比对键名。
+如果用户 `.env` 里有 `ASR_API_KEY_BACKUP=...`，这一行会被整行替换成 `ASR_API_KEY=<new>`，备份键被静默破坏。应改为按 `=` 切分后比对键名。
 
 ### 2.6 `[models] options` 是死配置
 

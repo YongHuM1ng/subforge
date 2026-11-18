@@ -1,4 +1,8 @@
-"""视频/音频 -> SRT 字幕（OpenRouter: microsoft/mai-transcribe-2）
+"""视频/音频 -> SRT 字幕（默认 OpenRouter: microsoft/mai-transcribe-2）
+
+识别接口支持两种协议，在 config.toml 的 [asr] 段配置：
+    transcriptions     OpenAI/OpenRouter 的 /audio/transcriptions（默认）
+    chat_completions   把音频 base64 放进 messages 的 OpenAI-compatible 接口
 
 用法：把视频文件拖到 1_视频转字幕.cmd 上（可一次拖多个），或在命令行：
     python asr2srt.py 视频.mp4 [视频2.mkv ...] [选项]
@@ -13,7 +17,8 @@
 工作方式：
     1. ffmpeg 抽取 16k 单声道 wav
     2. 检测静音，把音频切成 20~60 秒、尽量落在静音处的片段
-    3. 每片调用一次 ASR，请求 verbose_json + timestamp_granularities=["word"] 拿词级时间戳
+    3. 每片调用一次 ASR；transcriptions 协议请求 verbose_json + 词级时间戳，
+       chat_completions 协议只取文本，按定长切片分配时间轴
     4. 时间轴 = 切片起点 + 片内偏移；响应里没有时间戳时改用 15 秒定长切片重新识别
        接口不接受时间戳参数时直接报错，按提示修改 [asr] timestamps（word / segment / none）
     5. 按标点断句、按显示宽度换行，写出 UTF-8(BOM) 的 .srt
@@ -96,6 +101,8 @@ def main(argv: list[str]) -> int:
     proxy = resolve_proxy(config.API_URL, config.PROXY)
     for line in kv_lines([
         ("模型", config.MODEL),
+        ("预设", config.PRESET),
+        ("协议", config.PROTOCOL),
         ("接口", config.API_URL),
         ("代理", proxy or "直连"),
     ], sys.stdout, indent=0):
