@@ -20,10 +20,8 @@ reasoning_effort = "low"
 # 默认：小米 MiMo
 preset = "mimo"
 
-# 想改用 OpenRouter：注释掉上面的 [asr] 块，取消下面的注释。
-# Key 仍写在 .env 的 ASR_API_KEY。
-# [asr]
-# preset = "openrouter"
+# 想改用 OpenRouter：把上面的 preset 改成 "openrouter"。
+# 模型预设里已包含 microsoft/mai-transcribe-2；想显式写可以取消下一行注释。
 # model = "microsoft/mai-transcribe-2"
 
 [translation]

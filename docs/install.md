@@ -120,7 +120,7 @@ GitHub Releases 提供两种便携包：
 
 所有预设默认都从 `.env` 的 `ASR_API_KEY` 读取 Key；切换 preset 时只需要换 Key 的值。
 
-例如切到 OpenRouter：
+例如把现有 `[asr]` 切到 OpenRouter：
 
 ```toml
 [asr]
