@@ -57,12 +57,12 @@ autobuild-2026-11-17-12-40 / ffmpeg-n8.1.3-35-gf1acb0a266-win64-lgpl-8.1.zip
 ## 发布
 
 ```powershell
-git tag v0.1.1
-git push origin v0.1.1
-gh release create v0.1.1 dist\SubForge-0.1.1-windows-x64-portable.zip `
-  dist\SubForge-0.1.1-windows-x64-portable-ffmpeg.zip `
-  dist\SubForge-0.1.1-windows-x64-portable-ffmpeg.7z `
-  --title "SubForge 0.1.1" --notes "便携版：只依赖单个 ffmpeg.exe"
+git tag v0.2.0
+git push origin v0.2.0
+gh release create v0.2.0 dist\SubForge-0.2.0-windows-x64-portable.zip `
+  dist\SubForge-0.2.0-windows-x64-portable-ffmpeg.zip `
+  dist\SubForge-0.2.0-windows-x64-portable-ffmpeg.7z `
+  --title "SubForge 0.2.0" --notes "ASR 预设、DeepSeek 默认配置、思考等级"
 ```
 
-`v0.1.1` 和产物文件名里的版本要与 `pyproject.toml` 一致。
+`v0.2.0` 和产物文件名里的版本要与 `pyproject.toml` 一致。
