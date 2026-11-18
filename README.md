@@ -36,8 +36,11 @@
      `.env` 里没有 Key，程序也会提示输入并自动保存。
    - 思考等级：`config.toml` 的 `[api] reasoning_effort`，默认 `low`；
      可选 `none` / `low` / `medium` / `high` / `max`。
-   - 翻译换其他服务：改 `config.toml` 的 `[api]` endpoint / model，把该服务的 Key
-     写到 `LLM_API_KEY`。
+   - 识别换 OpenRouter：`[asr]` 改成 `preset = "openrouter"`、
+     `model = "microsoft/mai-transcribe-2"`，Key 仍写 `ASR_API_KEY`。
+   - 识别换标准 OpenAI：`[asr]` 改成 `preset = "openai"`。
+   - 翻译换任意 OpenAI-compatible LLM API（OpenAI、OpenRouter、Qwen 等）：
+     改 `[api]` 的 endpoint / model，把 Key 写到 `LLM_API_KEY`。
    - 想要完整参数：用 `config.full.toml` 覆盖 `config.toml`；默认值完全相同，行为不变。
 
    `.env` 和 `config.toml` 里可能有密钥，不要发给别人，也不要提交到 GitHub。
