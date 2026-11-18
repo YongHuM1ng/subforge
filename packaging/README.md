@@ -15,6 +15,11 @@
 
 不带 ffmpeg 的版本只发 zip。7z 只用于压缩 `ffmpeg.exe`，Windows 10 需要 7-Zip 才能解压。
 
+## 包内配置
+
+- `config.toml`：由 `config.common.toml` 生成，默认小米 MiMo + DeepSeek，通常不用改
+- `docs/config-reference.toml`：`config.toml.example` 的完整参数副本
+
 `--variant base` 或 `--variant ffmpeg` 可以只构建其中一个；`--refresh` 会重新下载
 Python、aiohttp 轮子和 ffmpeg。
 

@@ -184,8 +184,7 @@ def ensure_ffmpeg_archive(refresh: bool = False) -> Path:
 
 
 def copy_project(staging: Path) -> None:
-    for name in ("README.md", "LICENSE", "requirements.txt", "pyproject.toml",
-                 "config.toml.example"):
+    for name in ("README.md", "LICENSE", "requirements.txt", "pyproject.toml"):
         shutil.copy2(ROOT / name, staging / name)
     for launcher in sorted(ROOT.glob("*.bat")):
         shutil.copy2(launcher, staging / launcher.name)
@@ -196,17 +195,24 @@ def copy_project(staging: Path) -> None:
     for item in (ROOT / "docs").iterdir():
         if item.is_file() and item.name != "review.md":
             shutil.copy2(item, docs / item.name)
-    # 便携包自带一份可编辑配置，避免用户第一次运行找不到 config.toml。
-    shutil.copy2(ROOT / "config.toml.example", staging / "config.toml")
+    # 便携包放默认配置；完整参数参考放进 docs。
+    shutil.copy2(ROOT / "config.common.toml", staging / "config.toml")
+    shutil.copy2(ROOT / "config.toml.example", docs / "config-reference.toml")
     (staging / "首次使用.txt").write_text(
         "SubForge 便携版\n"
         "================\n\n"
-        "1. 双击任意启动器，把视频/字幕拖到窗口或图标上。\n"
-        "2. 第一次识别时会提示输入 OpenRouter Key，输入后自动写入 .env。\n"
-        "3. 翻译前请编辑 config.toml 的 [api] endpoint 和 model，并按提示输入翻译 Key。\n"
-        "4. 如果下载的是不带 ffmpeg 的包，请安装 ffmpeg 到 PATH，\n"
-        "   或把 ffmpeg.exe 放到 tools\\ffmpeg\\bin。\n\n"
-        "详细说明见 docs/install.md 和 docs/usage.md。\n",
+        "默认：小米 MiMo 识别 + DeepSeek 官方翻译。\n\n"
+        "1. 到 DeepSeek 开放平台创建 Key：https://platform.deepseek.com/api_keys\n"
+        "   （小米 MiMo 的 Key 请按小米控制台创建）\n"
+        "2. 在 .env 写两个 Key：\n"
+        "   ASR_API_KEY=...          # 默认小米 MiMo 的 Key\n"
+        "   LLM_API_KEY=...          # DeepSeek Key\n"
+        "3. 双击启动器，把视频/字幕拖进去。\n\n"
+        "换翻译服务：改 config.toml 的 [api] endpoint / model，\n"
+        "            把该服务的 Key 写到 .env 的 LLM_API_KEY。\n"
+        "完整参数参考：docs\\config-reference.toml 或 docs\\install.md。\n\n"
+        "如果下载的是不带 ffmpeg 的包，请安装 ffmpeg 到 PATH，\n"
+        "或把 ffmpeg.exe 放到 tools\\ffmpeg\\bin。\n",
         encoding="utf-8",
     )
 
