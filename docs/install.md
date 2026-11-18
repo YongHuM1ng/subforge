@@ -4,18 +4,21 @@
 
 - Windows 10/11
 - Python 3.11 或更高
-- `ffmpeg` 和 `ffprobe`（识别阶段用于抽音轨和检测静音；便携版分自带 ffmpeg 和手动放置两种）
+- `ffmpeg`（识别阶段用于抽音轨、探测音频流和检测静音；便携版分自带 ffmpeg 和手动放置两种）
 - 一个 OpenAI-compatible Chat Completions 服务（翻译用）
 - 一个 OpenRouter API Key（识别用）
 
-## 便携包（不用安装 Python）
+## 便携包（Windows 10/11 x64，不用安装 Python）
 
 从 [GitHub Releases](https://github.com/YongHuM1ng/subforge/releases) 下载：
 
 | 包 | 说明 |
 |---|---|
-| `SubForge-<版本>-portable.zip` | 不含 ffmpeg，需要安装到 PATH 或放到 `tools\ffmpeg\bin` |
-| `SubForge-<版本>-portable-ffmpeg.zip` | 自带 LGPL 构建的 ffmpeg / ffprobe，解压即用 |
+| `SubForge-<版本>-windows-x64-portable.zip` | 不含 ffmpeg，需要安装到 PATH 或放到 `tools\ffmpeg\bin` |
+| `SubForge-<版本>-windows-x64-portable-ffmpeg.zip` | 自带 LGPL 构建的 ffmpeg，解压即用 |
+
+便携包只支持 64 位 Windows：内置的是 Windows amd64 embeddable Python 和 win64
+静态 ffmpeg。32 位 Windows、ARM64、Linux、macOS 不能直接运行。
 
 解压后直接双击启动器。便携包内置 `runtime\python`，启动器会优先使用它；
 源码开发环境没有 `runtime` 时自动回退到 `.venv\Scripts\python.exe`。
@@ -43,23 +46,21 @@ py -m venv .venv
 
 ```powershell
 ffmpeg -version
-ffprobe -version
 ```
 
 ### ffmpeg
 
-识别阶段需要 `ffmpeg` / `ffprobe`。查找顺序：
+识别阶段需要 `ffmpeg`。查找顺序：
 
-1. 环境变量 `FFMPEG_BIN` / `FFPROBE_BIN`
+1. 环境变量 `FFMPEG_BIN`
 2. 系统 PATH
 3. 项目内的 `tools\ffmpeg\bin`
 
 没有安装时，可以从 [ffmpeg.org 下载页](https://ffmpeg.org/download.html) 获取，解压后把
-`ffmpeg.exe` / `ffprobe.exe` 放到：
+`ffmpeg.exe` 放到：
 
 ```text
 tools\ffmpeg\bin\ffmpeg.exe
-tools\ffmpeg\bin\ffprobe.exe
 ```
 
 GitHub Releases 提供两种便携包：
@@ -67,7 +68,7 @@ GitHub Releases 提供两种便携包：
 | 包 | 说明 |
 |---|---|
 | `SubForge-<版本>-portable.zip` | 不含 ffmpeg，需要安装到 PATH 或放到上面的目录 |
-| `SubForge-<版本>-portable-ffmpeg.zip` | 自带 LGPL 构建的 ffmpeg / ffprobe，解压即用 |
+| `SubForge-<版本>-portable-ffmpeg.zip` | 自带 LGPL 构建的 ffmpeg，解压即用 |
 
 源码运行时不自动下载 ffmpeg。附带版中 ffmpeg 的来源、许可证和可替换说明见
 `tools\ffmpeg\NOTICE.txt`。

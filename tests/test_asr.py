@@ -14,7 +14,7 @@ from asr.text import display_width, split_sentences, wrap_lines
 from asr.transcribe import ApiError, Gate, UnsupportedParamError, detect_language, run_chunks, transcribe_chunk
 from asr.tui import format_bar, progress_line
 
-HAS_FFMPEG = bool(shutil.which("ffmpeg") and shutil.which("ffprobe"))
+HAS_FFMPEG = bool(shutil.which("ffmpeg"))
 
 
 class AsrTextTest(unittest.TestCase):
@@ -164,7 +164,7 @@ class TranscribeRetryTest(unittest.TestCase):
         self.assertEqual(gate.limit, 2)
 
 
-@unittest.skipUnless(HAS_FFMPEG, "需要 ffmpeg/ffprobe")
+@unittest.skipUnless(HAS_FFMPEG, "需要 ffmpeg")
 class AsrDryRunTest(unittest.TestCase):
     def test_dry_run(self):
         with tempfile.TemporaryDirectory() as folder:

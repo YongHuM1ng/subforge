@@ -1,7 +1,6 @@
 """音视频探测、抽音轨、静音切片与工作目录。"""
 from __future__ import annotations
 
-import json
 import re
 import subprocess
 import tempfile
@@ -16,13 +15,11 @@ def run_ok(cmd: list[str], **kw) -> subprocess.CompletedProcess:
 
 
 def probe_has_audio(path: Path) -> bool:
-    proc = run_ok([config.FFPROBE, "-v", "error", "-print_format", "json",
-                   "-show_streams", "-select_streams", "a:0", str(path)])
-    try:
-        info = json.loads(proc.stdout.decode("utf-8", "replace") or "{}")
-    except Exception:
-        return False
-    return bool(info.get("streams"))
+    """用 ffmpeg -i 输出的流信息判断是否有音频轨。"""
+    proc = run_ok([config.FFMPEG, "-hide_banner", "-nostdin", "-i", str(path)])
+    text = proc.stderr.decode("utf-8", "replace")
+    return any(line.lstrip().startswith("Stream #") and "Audio:" in line
+               for line in text.splitlines())
 
 
 def extract_wav(src: Path, wav_path: Path) -> None:

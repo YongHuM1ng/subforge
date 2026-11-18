@@ -4,8 +4,11 @@
     .venv\\Scripts\\python.exe packaging\\build_portable.py --variant both
 
 产物（dist/）：
-    SubForge-<版本>-portable.zip         不带 ffmpeg，需手动放置或安装
-    SubForge-<版本>-portable-ffmpeg.zip  自带 ffmpeg/ffprobe（LGPL 构建）
+    SubForge-<版本>-windows-x64-portable.zip         不带 ffmpeg，需手动放置或安装
+    SubForge-<版本>-windows-x64-portable-ffmpeg.zip  自带 ffmpeg（LGPL 构建）
+
+仅支持 64 位 Windows 10/11：便携包内置的是 Windows amd64 embeddable Python 和
+win64 静态 ffmpeg，不能在 32 位 Windows、ARM64、Linux 或 macOS 上直接运行。
 
 便携包内置 Windows embeddable Python 和 aiohttp，解压后双击启动器即可运行。
 ffmpeg 只在「附带版」构建时下载，并带 NOTICE 与许可证说明；应用运行时不再联网下载。
@@ -200,7 +203,7 @@ def copy_project(staging: Path) -> None:
         "2. 第一次识别时会提示输入 OpenRouter Key，输入后自动写入 .env。\n"
         "3. 翻译前请编辑 config.toml 的 [api] endpoint 和 model，并按提示输入翻译 Key。\n"
         "4. 如果下载的是不带 ffmpeg 的包，请安装 ffmpeg 到 PATH，\n"
-        "   或把 ffmpeg.exe / ffprobe.exe 放到 tools\\ffmpeg\\bin。\n\n"
+        "   或把 ffmpeg.exe 放到 tools\\ffmpeg\\bin。\n\n"
         "详细说明见 docs/install.md 和 docs/usage.md。\n",
         encoding="utf-8",
     )
@@ -239,19 +242,19 @@ def install_ffmpeg(staging: Path, archive: Path, expected: str) -> None:
     with zipfile.ZipFile(archive) as zf:
         for info in zf.infolist():
             name = Path(info.filename).name
-            if name in ("ffmpeg.exe", "ffprobe.exe"):
+            if name == "ffmpeg.exe":
                 with zf.open(info) as source, (bin_dir / name).open("wb") as target:
                     shutil.copyfileobj(source, target)
             elif name.lower() in ("license.txt", "copying.lgplv2.1") and not license_written:
                 with zf.open(info) as source, (bin_dir.parent / "LICENSE.txt").open("wb") as target:
                     shutil.copyfileobj(source, target)
                 license_written = True
-    if not (bin_dir / "ffmpeg.exe").exists() or not (bin_dir / "ffprobe.exe").exists():
-        raise RuntimeError("ffmpeg 压缩包缺少 ffmpeg.exe 或 ffprobe.exe")
+    if not (bin_dir / "ffmpeg.exe").exists():
+        raise RuntimeError("ffmpeg 压缩包缺少 ffmpeg.exe")
 
     notice = (
-        "FFmpeg binaries bundled with SubForge\n"
-        "====================================\n\n"
+        "FFmpeg binary bundled with SubForge\n"
+        "===================================\n\n"
         f"Archive: {FFMPEG_URL}\n"
         f"SHA-256: {expected}\n"
         f"Downloaded: {date.today().isoformat()}\n"
@@ -259,7 +262,7 @@ def install_ffmpeg(staging: Path, archive: Path, expected: str) -> None:
         "Source code: https://github.com/FFmpeg/FFmpeg\n"
         "License: GNU Lesser General Public License v2.1 or later\n"
         "License text: LICENSE.txt (in this directory, if provided by the build)\n\n"
-        "You may replace ffmpeg.exe and ffprobe.exe with another compatible build.\n"
+        "You may replace ffmpeg.exe with another compatible build.\n"
     )
     (bin_dir.parent / "NOTICE.txt").write_text(notice, encoding="utf-8")
     if not license_written:
@@ -281,7 +284,7 @@ def zip_package(staging: Path, target: Path) -> None:
 
 def build_variant(version: str, with_ffmpeg: bool, out_dir: Path) -> Path:
     suffix = "portable-ffmpeg" if with_ffmpeg else "portable"
-    target = out_dir / f"SubForge-{version}-{suffix}.zip"
+    target = out_dir / f"SubForge-{version}-windows-x64-{suffix}.zip"
     staging = out_dir / ".build" / suffix
     if staging.exists():
         shutil.rmtree(staging)

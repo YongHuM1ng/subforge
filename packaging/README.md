@@ -1,6 +1,7 @@
 # 便携包构建
 
-生成 Windows 免安装包，内置 Python 3.11.9 embeddable 和 aiohttp 依赖。
+生成 **Windows 10/11 x64** 免安装包，内置 Python 3.11.9 embeddable 和 aiohttp 依赖。
+产物不能直接用于 32 位 Windows、ARM64、Linux 或 macOS。
 
 ```powershell
 .\.venv\Scripts\python.exe packaging\build_portable.py --variant both
@@ -8,8 +9,8 @@
 
 产物在 `dist\`：
 
-- `SubForge-<版本>-portable.zip`：不带 ffmpeg，用户自行安装或放到 `tools\ffmpeg\bin`
-- `SubForge-<版本>-portable-ffmpeg.zip`：附带 ffmpeg / ffprobe，解压即用
+- `SubForge-<版本>-windows-x64-portable.zip`：不带 ffmpeg，用户自行安装或放到 `tools\ffmpeg\bin`
+- `SubForge-<版本>-windows-x64-portable-ffmpeg.zip`：附带 ffmpeg，解压即用
 
 `--variant base` 或 `--variant ffmpeg` 可以只构建其中一个；`--refresh` 会重新下载
 Python、aiohttp 轮子和 ffmpeg。
@@ -38,7 +39,7 @@ autobuild-2026-11-17-12-40 / ffmpeg-n8.1.3-35-gf1acb0a266-win64-lgpl-8.1.zip
 
 `tools/ffmpeg/` 里会写入：
 
-- `bin/ffmpeg.exe`、`bin/ffprobe.exe`
+- `bin/ffmpeg.exe`（识别、探测音频流、抽音轨、静音检测都只用它）
 - `LICENSE.txt`：该构建附带的 LGPL 许可证
 - `NOTICE.txt`：来源地址、校验值、许可证和可替换说明
 
@@ -47,10 +48,10 @@ autobuild-2026-11-17-12-40 / ffmpeg-n8.1.3-35-gf1acb0a266-win64-lgpl-8.1.zip
 ## 发布
 
 ```powershell
-git tag v0.1.0
-git push origin v0.1.0
-gh release create v0.1.0 dist\SubForge-0.1.0-portable.zip dist\SubForge-0.1.0-portable-ffmpeg.zip `
-  --title "SubForge 0.1.0" --notes "首个便携版"
+git tag v0.1.1
+git push origin v0.1.1
+gh release create v0.1.1 dist\SubForge-0.1.1-windows-x64-portable.zip dist\SubForge-0.1.1-windows-x64-portable-ffmpeg.zip `
+  --title "SubForge 0.1.1" --notes "便携版：只依赖单个 ffmpeg.exe"
 ```
 
-`v0.1.0` 和产物文件名里的版本要与 `pyproject.toml` 一致。
+`v0.1.1` 和产物文件名里的版本要与 `pyproject.toml` 一致。

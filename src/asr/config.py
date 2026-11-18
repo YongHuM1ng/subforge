@@ -41,7 +41,7 @@ TEMP_DIR = Path(os.environ.get("TRANSLATE_TEMP_DIR") or (ROOT / "temp"))
 
 
 def _find_tool(name: str) -> str:
-    """按 环境变量 → PATH → 项目内 tools/ffmpeg/bin 的顺序找 ffmpeg/ffprobe。"""
+    """按 环境变量 → PATH → 项目内 tools/ffmpeg/bin 的顺序找 ffmpeg。"""
     override = os.environ.get(f"{name.upper()}_BIN")
     if override:
         return override
@@ -55,7 +55,6 @@ def _find_tool(name: str) -> str:
 
 
 FFMPEG = _find_tool("ffmpeg")
-FFPROBE = _find_tool("ffprobe")
 VIDEO_EXTS = {
     ".mp4", ".mkv", ".mov", ".avi", ".flv", ".wmv", ".webm", ".m4v", ".ts",
     ".mpg", ".mpeg", ".rmvb", ".rm", ".3gp", ".m2ts", ".vob", ".ogv",

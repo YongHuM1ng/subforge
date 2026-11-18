@@ -38,14 +38,13 @@ class EnsureFfmpegTest(unittest.TestCase):
         ffmpeg._checked = False
         ffmpeg._ok = False
 
-    def test_success_when_both_tools_exist(self):
+    def test_success_when_ffmpeg_exists(self):
         with patch("asr.ffmpeg.shutil.which", return_value="tool"):
             self.assertTrue(ffmpeg.ensure_ffmpeg())
 
     def test_missing_tool_prints_manual_path(self):
         with patch("asr.ffmpeg.shutil.which", return_value=None), \
                 patch.object(config, "FFMPEG", "ffmpeg"), \
-                patch.object(config, "FFPROBE", "ffprobe"), \
                 patch("asr.ffmpeg.log") as log:
             self.assertFalse(ffmpeg.ensure_ffmpeg())
         text = "\n".join(str(call.args[0]) for call in log.call_args_list)

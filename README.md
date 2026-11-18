@@ -25,17 +25,19 @@
 双击启动器（不带文件）会进入队列模式：把文件拖进窗口，可多次拖入，每批回车换行，
 最后按一次空行回车开始。文件之间严格串行，单个失败不影响后续，结束时统一汇总。
 
-## 免安装便携包
+## 免安装便携包（Windows 10/11 x64）
 
 不想安装 Python：从 [Releases](https://github.com/YongHuM1ng/subforge/releases) 下载：
 
 | 包 | 说明 |
 |---|---|
-| `SubForge-<版本>-portable.zip` | 不含 ffmpeg，需要安装到 PATH 或放到 `tools\ffmpeg\bin` |
-| `SubForge-<版本>-portable-ffmpeg.zip` | 自带 LGPL 构建的 ffmpeg / ffprobe，解压即用 |
+| `SubForge-<版本>-windows-x64-portable.zip` | 不含 ffmpeg，需要安装到 PATH 或放到 `tools\ffmpeg\bin` |
+| `SubForge-<版本>-windows-x64-portable-ffmpeg.zip` | 自带 LGPL 构建的 ffmpeg，解压即用 |
 
 解压后双击启动器即可。首次识别会提示输入 OpenRouter Key；翻译前编辑 `config.toml`
 的 `[api]` 段。便携包使用 `runtime\python`，不需要本机安装 Python。
+
+便携包只支持 64 位 Windows 10/11；32 位、ARM64、Linux、macOS 不能直接使用。
 
 ## 功能
 
@@ -80,7 +82,7 @@ translate/
 │   │   ├── transcribe.py        # 请求、重试、并发、语言识别
 │   │   ├── cues.py              # 时间轴、cue、SRT/TXT
 │   │   ├── engine.py            # 识别主流程
-│   │   ├── ffmpeg.py            # ffmpeg/ffprobe 查找
+│   │   ├── ffmpeg.py            # ffmpeg 查找
 │   │   ├── keys.py              # OpenRouter 密钥
 │   │   └── cli.py               # 命令行
 │   ├── asr2srt.py               # 识别命令行入口（实现在 asr.cli）

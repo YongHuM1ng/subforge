@@ -139,11 +139,10 @@ proxy = "http://127.0.0.1:7890"
 
 ## ASR 找不到 ffmpeg
 
-确认 `ffmpeg` 和 `ffprobe` 在 PATH 中：
+确认 `ffmpeg` 在 PATH 中，或已放到 `tools\ffmpeg\bin\ffmpeg.exe`：
 
 ```powershell
 ffmpeg -version
-ffprobe -version
 ```
 
 ## ASR 提示「没有音轨」
@@ -151,7 +150,7 @@ ffprobe -version
 视频容器里确实没有音频流，或音频是特殊编码。可以先用 ffmpeg 检查：
 
 ```powershell
-ffprobe -v error -select_streams a:0 -show_streams "video.mp4"
+ffmpeg -hide_banner -i "video.mp4"
 ```
 
 ## 语法检查与测试
