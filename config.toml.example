@@ -1,0 +1,98 @@
+# 远端模型与字幕翻译配置示例
+
+[api]
+# OpenAI 兼容的 Chat Completions 接口地址
+endpoint = "https://api.openai.com/v1/chat/completions"
+# 模型名称，必须是 API 服务实际支持的模型
+model = "gpt-4o-mini"
+# 密钥请写在项目根目录 .env 的 LLM_API_KEY，不要直接写入本文件
+api_key = ""
+# 单次 API 请求超时时间，单位：秒
+timeout = 120
+# 请求失败后的最大重试次数
+retries = 2
+# 结构化输出方式：json_schema / json_object / none
+# 第三方兼容接口通常使用 json_object
+structured_output = "json_object"
+# 代理：system = 使用系统代理（无则直连）；none = 从不走代理；也可填 http://host:port
+proxy = "system"
+
+[asr]
+# 识别服务：OpenRouter 音频转写接口
+api_url = "https://openrouter.ai/api/v1/audio/transcriptions"
+model = "microsoft/mai-transcribe-2"
+# 单个文件内的分片并发数，以及同时处理几个文件
+workers = 8
+jobs = 1
+# 静音自适应切片（秒）
+min_chunk = 20.0
+max_chunk = 60.0
+target_chunk = 45.0
+silence_noise = "-32dB"
+silence_min = 0.35
+fallback_chunk = 15.0
+# 字幕排版与显示时长
+line_width = 42
+max_lines = 2
+min_cue = 1.0
+max_cue = 7.0
+min_gap = 0.06
+# 费用估算（美元 / 小时音频）
+price_per_hour = 0.10
+# 时间戳粒度：word = 词级（默认，最准）；segment = 分段级；none = 不要时间戳，按 fallback_chunk 定长切片
+# 接口不接受当前粒度时会报错并提示改这里，不会在运行中自动降级
+timestamps = "word"
+# 识别请求的代理：默认沿用 [api] proxy；需要单独指定时取消下一行注释
+# proxy = "http://127.0.0.1:7890"
+# 也可以用环境变量覆盖：ASR_API_URL / ASR_MODEL / ASR_WORKERS / ASR_PROXY / ASR_TIMESTAMPS
+
+[translation]
+# 源语言；自动识别可填写“自动识别”
+source = "自动识别"
+# 目标语言
+target = "简体中文"
+# 是否在翻译完成后进行第二轮语言润色
+polish = true
+# 是否允许模型结合相邻字幕重新组织短语和半句话，使目标语言更自然
+# true：允许自然断句和重新分配；false：严格逐条对应
+natural_segmentation = true
+# 是否在翻译完成后暂停，允许从命令行输入本次人工润色要求
+pause_before_polish = false
+# 翻译自由度：faithful / natural / creative
+translation_fidelity = "natural"
+
+[prompts]
+# 长期有效的附加提示词，会加入全文分析、翻译和润色请求
+# 这里适合填写项目专用要求、角色设定、术语偏好、语言风格等
+additional = """
+请保持译文自然、口语化，保留原文语气和表达强度。
+对于 ASR 无法完全确认的地方，允许结合上下文进行轻微合理推测。
+"""
+
+[processing]
+# 每批发送给模型的字幕条数
+batch_size = 20
+# 每批额外提供前后多少条字幕作为上下文
+context = 3
+# 是否在翻译前进行全文主题、风格、术语和 ASR 分析
+global_analysis = true
+# 同时进行的远端 API 请求数量；遇到 429 限流时应调小
+max_workers = 2
+
+[models]
+# 可选：按阶段覆盖模型；不填则全部使用 [api] model
+# 建议：analysis 用便宜但上下文大的模型，translation 用最强的模型，
+#       polish 可以与 translation 相同，或降一档以节省时间和费用。
+# analysis = "qwen-plus"
+# translation = "gpt-4o"
+# polish = "gpt-4o-mini"
+
+# 内容审查/拒答时是否启用模型回退（关闭后仍会重试，但不会换模型）
+fallback_enabled = true
+# 默认回退模型；留空表示不启用
+# 必须和主模型共用同一个 endpoint / key
+fallback = ""
+# 可选：按阶段覆盖回退模型；不填则使用上面的 fallback
+# analysis_fallback = "qwen-plus"
+# translation_fallback = "gpt-4o-mini"
+# polish_fallback = "gpt-4o-mini"

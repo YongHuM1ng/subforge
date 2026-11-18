@@ -1,0 +1,36 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "subforge"
+version = "0.1.0"
+description = "视频转字幕与 SRT 翻译工具"
+requires-python = ">=3.11"
+dependencies = ["aiohttp>=3.9"]
+
+[project.optional-dependencies]
+dev = ["ruff>=0.6"]
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+py-modules = ["asr2srt", "queue_srt", "translate_srt", "workflow"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
+[tool.ruff.lint.per-file-ignores]
+# 提示词按段落保持单行，避免把换行写进发给模型的文本。
+"src/srt_translator/prompts.py" = ["E501"]
+"src/srt_translator/pipeline.py" = ["E501"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]

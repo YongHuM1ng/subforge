@@ -1,0 +1,17 @@
+# 密钥与本地配置（不要提交）
+*.env
+config*.toml
+!config.toml.example
+
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.ruff_cache/
+
+# 本地临时产物
+temp/
+*.log
