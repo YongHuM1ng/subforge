@@ -6,10 +6,13 @@
 ## 依赖与运行
 
 - 只依赖 Python 标准库 + `aiohttp`；这是刻意选择，不要为了小功能引入新依赖。
-- Python 3.11+。开发环境：`.venv\Scripts\python.exe`。
+- Python 3.11+。开发环境：`.venv\Scripts\python.exe`。便携包使用
+  `runtime\python\python.exe`，由 `packaging/build_portable.py` 生成。
 - 测试：`.venv\Scripts\python.exe -m unittest discover -s tests -t .`
 - 语法检查：`.venv\Scripts\python.exe -m compileall src`
 - Lint：`ruff check src tests`（配置在 `pyproject.toml`）。
+- 便携包：`.venv\Scripts\python.exe packaging\build_portable.py --variant both`；
+  详见 `packaging/README.md`。
 
 ## 代码约定
 
@@ -50,4 +53,6 @@
 - `4_只润色SRT.bat` → 单文件走 `src/start_polish.ps1`；双击无参数走
   `src/queue_srt.py polish` 队列模式，两者最终都调用 `translate_srt.py`
 - 四个启动器双击且不带文件时都进入队列模式，公共逻辑在 `common/queue.py`
+- 启动器按 `runtime\python\python.exe` → `.venv\Scripts\python.exe` → PATH 中的
+  `python` 顺序查找解释器；`src/start_polish.ps1` 遵循同样的顺序
 - 拖到图标上的文件以参数传入 `queue_srt.py`，由 `common/queue.py` 的 `resolve_files` 校验

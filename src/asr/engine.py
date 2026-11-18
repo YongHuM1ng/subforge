@@ -11,6 +11,7 @@ from common.paths import unique_output_path
 
 from . import config
 from .cues import build_cues, finalize_cues, write_srt, write_txt
+from .ffmpeg import ensure_ffmpeg
 from .media import (
     detect_silences,
     extract_wav,
@@ -47,11 +48,10 @@ def process_file(src: Path, api_key: str, opts: dict) -> ProcessResult:
     if src.suffix.lower() not in config.VIDEO_EXTS | config.AUDIO_EXTS:
         log(f"[跳过] 不支持的扩展名：{src.suffix}")
         return ProcessResult()
+    if not ensure_ffmpeg():
+        return ProcessResult()
     if not probe_has_audio(src):
         log("[错误] 这个文件里没有音轨，无法识别。")
-        return ProcessResult()
-    if shutil.which(config.FFMPEG) is None:
-        log("[错误] 找不到 ffmpeg，请确认已安装并在 PATH 中。")
         return ProcessResult()
 
     wd = workdir_for()

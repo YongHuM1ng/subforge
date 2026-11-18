@@ -36,9 +36,26 @@ TIMESTAMPS = "word"
 TIMESTAMP_MODES = {"word": 2, "segment": 1, "none": 0}
 
 ROOT = Path(__file__).resolve().parents[2]
+TOOLS_BIN = ROOT / "tools" / "ffmpeg" / "bin"
 TEMP_DIR = Path(os.environ.get("TRANSLATE_TEMP_DIR") or (ROOT / "temp"))
-FFMPEG = os.environ.get("FFMPEG_BIN") or shutil.which("ffmpeg") or "ffmpeg"
-FFPROBE = os.environ.get("FFPROBE_BIN") or shutil.which("ffprobe") or "ffprobe"
+
+
+def _find_tool(name: str) -> str:
+    """按 环境变量 → PATH → 项目内 tools/ffmpeg/bin 的顺序找 ffmpeg/ffprobe。"""
+    override = os.environ.get(f"{name.upper()}_BIN")
+    if override:
+        return override
+    found = shutil.which(name)
+    if found:
+        return found
+    local = TOOLS_BIN / f"{name}.exe"
+    if local.exists():
+        return str(local)
+    return name
+
+
+FFMPEG = _find_tool("ffmpeg")
+FFPROBE = _find_tool("ffprobe")
 VIDEO_EXTS = {
     ".mp4", ".mkv", ".mov", ".avi", ".flv", ".wmv", ".webm", ".m4v", ".ts",
     ".mpg", ".mpeg", ".rmvb", ".rm", ".3gp", ".m2ts", ".vob", ".ogv",

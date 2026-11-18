@@ -7,7 +7,8 @@ rem Drag an already translated SRT onto this BAT file.
 rem Double-click without files to enter queue mode (drag files into the window).
 set "SCRIPT_DIR=%~dp0"
 set "PS1=%SCRIPT_DIR%src\start_polish.ps1"
-set "PY=%SCRIPT_DIR%.venv\Scripts\python.exe"
+set "PY=%SCRIPT_DIR%runtime\python\python.exe"
+if not exist "%PY%" set "PY=%SCRIPT_DIR%.venv\Scripts\python.exe"
 if not exist "%PY%" set "PY=python"
 
 if not exist "%PS1%" (

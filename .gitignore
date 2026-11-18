@@ -15,3 +15,9 @@ dist/
 # 本地临时产物
 temp/
 *.log
+
+# 本地放置的 ffmpeg 等工具（不提交）
+/tools/
+
+# 便携包下载缓存
+/packaging/.cache/

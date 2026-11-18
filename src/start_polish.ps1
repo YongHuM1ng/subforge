@@ -13,13 +13,16 @@ param(
 
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $ProjectRoot = Split-Path -Parent $ScriptDir
-$Python = Join-Path $ProjectRoot '.venv\Scripts\python.exe'
+$Python = Join-Path $ProjectRoot 'runtime\python\python.exe'
+if (-not (Test-Path -LiteralPath $Python)) {
+    $Python = Join-Path $ProjectRoot '.venv\Scripts\python.exe'
+}
 $Program = Join-Path $ScriptDir 'translate_srt.py'
 $Config = Join-Path $ProjectRoot 'config.toml'
 
 try {
     if (-not (Test-Path -LiteralPath $Python)) {
-        throw "Virtual environment not found: $Python. Run: py -m venv .venv"
+        throw "Python runtime not found. Expected: runtime\python\python.exe or .venv\Scripts\python.exe"
     }
     if (-not (Test-Path -LiteralPath $Program)) {
         throw "Program not found: $Program"
