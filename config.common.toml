@@ -17,11 +17,12 @@ model = "deepseek-flash"
 reasoning_effort = "low"
 
 [asr]
-# 默认：小米 MiMo
+# 默认：小米 MiMo，模型 mimo-v2.5-asr
 preset = "mimo"
+# 更换模型：加一行 model = "..." 覆盖预设。
 
 # 想改用 OpenRouter：把上面的 preset 改成 "openrouter"。
-# 默认模型：microsoft/mai-transcribe-2
+# OpenRouter 默认模型：microsoft/mai-transcribe-2
 # 要更换模型时，取消下一行注释并修改。
 # model = "microsoft/mai-transcribe-2"
 

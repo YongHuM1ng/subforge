@@ -187,7 +187,7 @@ timestamps = "word"
 
 ### OpenAI-compatible ASR（Chat Completions）
 
-便携包默认就是小米 MiMo；单独写预设时只需要：
+便携包默认就是小米 MiMo（模型 `mimo-v2.5-asr`）；单独写预设时只需要：
 
 ```toml
 [asr]
