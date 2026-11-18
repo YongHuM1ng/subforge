@@ -1,0 +1,32 @@
+# SubForge 默认配置
+#
+# 默认：小米 MiMo 识别 + DeepSeek 官方翻译。
+# 在 .env 写：
+#   ASR_API_KEY=...          # 当前识别服务的 Key（默认小米 MiMo）
+#   LLM_API_KEY=...          # DeepSeek 的 Key
+#
+# 这里只列常用项；没写的参数使用默认值。
+# 完整参数参考：docs/config-reference.toml（便携包）或 config.toml.example（源码）。
+
+[api]
+# 翻译服务：DeepSeek 官方 OpenAI-compatible Chat Completions
+endpoint = "https://api.deepseek.com/chat/completions"
+model = "deepseek-flash"
+# 思考等级：none / low / medium / high / max
+# low 更快更省；需要更高翻译质量时改成 medium 或 high
+reasoning_effort = "low"
+
+[asr]
+# 预设：openrouter / openai / mimo
+preset = "mimo"
+# 需要覆盖预设时直接加字段，例如：
+# language = "ja"
+# model = "..."
+
+[translation]
+# 目标语言
+target = "简体中文"
+# 翻译后润色：默认关闭；需要时改成 true
+polish = false
+
+# 其余参数使用默认值；需要时见完整参数参考。

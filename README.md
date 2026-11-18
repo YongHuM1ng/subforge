@@ -2,32 +2,59 @@
 
 [![CI](https://github.com/YongHuM1ng/subforge/actions/workflows/ci.yml/badge.svg)](https://github.com/YongHuM1ng/subforge/actions/workflows/ci.yml)
 
-把视频变成字幕，再把字幕变成目标语言。两个核心程序保持独立，`src/workflow.py` 只负责串联。
-
-| 模块 | 职责 |
-|---|---|
-| `src/asr/` | 识别能力：配置、文本断句、音轨切片、转写、cue、主流程 |
-| `src/srt_translator/` | 翻译底层：客户端、提示词、流水线、SRT、折行 |
-| `src/asr2srt.py` / `translate_srt.py` / `workflow.py` / `queue_srt.py` | 命令行与启动器入口 |
+把视频变成字幕，再把字幕变成目标语言。提供 Windows 10/11 x64 免安装便携版，解压后双击启动器即可。
 
 ## 快速开始
 
-1. 首次使用请看 [安装与配置](docs/install.md)：建好 `.venv`、`config.toml`，并设置两个 Key。
-2. 把视频拖到启动器上：
+便携包仅支持 **Windows 10/11 x64**。推荐下载自带 ffmpeg 的版本，不需要安装 Python 或 ffmpeg。
+
+1. **下载便携包**：到 [Releases](https://github.com/YongHuM1ng/subforge/releases) 下载
+   `SubForge-<版本>-windows-x64-portable-ffmpeg.zip`（自带 ffmpeg，推荐）或
+   `...-ffmpeg.7z`（更小，Windows 10 需要 7-Zip 解压），解压到任意目录。
+2. **配置两个 Key**
+
+   便携包里的 `config.toml` 已经是默认配置：**小米 MiMo 识别 + DeepSeek 官方翻译**，
+   **这个文件不用改**。只需要在解压目录新建 `.env`：
+
+   | 写入 `.env` 的变量 | 用途 | 填什么 |
+   |---|---|---|
+   | `ASR_API_KEY` | 语音识别 | 当前识别服务的 Key（默认小米 MiMo） |
+   | `LLM_API_KEY` | 翻译 | DeepSeek 的 Key |
+
+   - 小米 MiMo Key：到小米 MiMo 控制台创建。
+   - DeepSeek Key：到 [platform.deepseek.com/api_keys](https://platform.deepseek.com/api_keys) 创建。
+   - 用记事本新建文件，文件名填 `.env`，保存类型选“所有文件”，内容：
+
+     ```ini
+     ASR_API_KEY=你的小米Key
+     LLM_API_KEY=你的DeepSeekKey
+     ```
+
+   `.env` 在资源管理器里可能是隐藏的，不用管，程序会自动读取。
+
+   - 只做识别：只填 `ASR_API_KEY`，拖到 `1_视频转字幕.bat`。第一次识别时如果
+     `.env` 里没有 Key，程序也会提示输入并自动保存。
+   - 思考等级：`config.toml` 的 `[api] reasoning_effort`，默认 `low`；
+     可选 `none` / `low` / `medium` / `high` / `max`。
+   - 翻译换其他服务：改 `config.toml` 的 `[api]` endpoint / model，把该服务的 Key
+     写到 `LLM_API_KEY`。
+   - 完整参数参考：`docs/config-reference.toml`。
+
+   `.env` 和 `config.toml` 里可能有密钥，不要发给别人，也不要提交到 GitHub。
+3. **拖入文件**：把视频拖到 `2_视频转字幕并翻译.bat`（识别 + 翻译），或
+   `1_视频转字幕.bat`（只识别）。
 
 | 启动器 | 作用 | 产物 |
 |---|---|---|
-| `1_视频转字幕.cmd` | 只识别 | `作品名.asr.语言.srt` |
-| `2_视频转字幕并翻译.cmd` | 识别 + 翻译 | 上面那条，以及 `作品名.目标语言.srt` |
-| `3_只翻译SRT.bat` | 翻译已有 SRT（可多选，含润色） | `作品名.目标语言.srt` |
+| `1_视频转字幕.bat` | 只识别 | `作品名.asr.语言.srt` |
+| `2_视频转字幕并翻译.bat` | 识别 + 翻译 | 上面那条，以及 `作品名.目标语言.srt` |
+| `3_只翻译SRT.bat` | 翻译已有 SRT（可多选；润色默认关闭） | `作品名.目标语言.srt` |
 | `4_只润色SRT.bat` | 重新润色已有译文 | `作品名.目标语言.polished.srt` |
 
 双击启动器（不带文件）会进入队列模式：把文件拖进窗口，可多次拖入，每批回车换行，
 最后按一次空行回车开始。文件之间严格串行，单个失败不影响后续，结束时统一汇总。
 
-## 免安装便携包（Windows 10/11 x64）
-
-不想安装 Python：从 [Releases](https://github.com/YongHuM1ng/subforge/releases) 下载：
+## 便携包说明
 
 | 包 | 说明 |
 |---|---|
@@ -35,18 +62,23 @@
 | `SubForge-<版本>-windows-x64-portable-ffmpeg.zip` | 自带 LGPL 构建的 ffmpeg，解压即用 |
 | `SubForge-<版本>-windows-x64-portable-ffmpeg.7z` | 同上，约 45 MB；Windows 10 需用 7-Zip 解压 |
 
-不带 ffmpeg 的版本只提供 zip。
+不带 ffmpeg 的版本只提供 zip。便携包内置 `runtime\python`，不需要本机安装 Python；
+32 位 Windows、ARM64、Linux、macOS 不能直接运行便携包。
 
-解压后双击启动器即可。首次识别会提示输入 OpenRouter Key；翻译前编辑 `config.toml`
-的 `[api]` 段。便携包使用 `runtime\python`，不需要本机安装 Python。
+## 模块
 
-便携包只支持 64 位 Windows 10/11；32 位、ARM64、Linux、macOS 不能直接使用。
+| 模块 | 职责 |
+|---|---|
+| `src/asr/` | 识别能力：配置、文本断句、音轨切片、转写、cue、主流程 |
+| `src/srt_translator/` | 翻译底层：客户端、提示词、流水线、SRT、折行 |
+| `src/asr2srt.py` / `translate_srt.py` / `workflow.py` / `queue_srt.py` | 命令行与启动器入口 |
 
 ## 功能
 
 **识别（ASR）**
 
 - 静音自适应切片（20–60 秒），长视频时间轴不漂移
+- 支持 OpenAI-compatible ASR：内置 `openrouter` / `openai` / `mimo` 预设，也可逐项覆盖
 - `verbose_json` + 词级时间戳；接口不接受时报错并提示改 `[asr] timestamps`（word / segment / none）
 - 并发请求、失败重试，按音频秒数计费
 - 不做跨运行缓存；识别失败重跑会重新请求所有分片；某一片最终失败时立即取消其余未发出的请求
@@ -57,7 +89,7 @@
 
 - 自动识别源语言、分批翻译、前后文上下文
 - 全文主题/风格/术语/ASR 纠错分析
-- 翻译后润色；支持 JSON Schema / JSON Object
+- 翻译后润色（默认关闭，可在 `config.toml` 开启）
 - 可保存分析结果，之后跳过分析和翻译，直接重新润色已有译文
 - 异步并发、失败重试；不使用批次缓存，某批最终失败时取消其余批次
 - 润色阶段失败时先保存未润色的译文和分析文件，可直接拖到 `4_只润色SRT.bat` 续跑
@@ -72,9 +104,9 @@
 ## 项目结构
 
 ```text
-translate/
-├── 1_视频转字幕.cmd
-├── 2_视频转字幕并翻译.cmd
+SubForge/
+├── 1_视频转字幕.bat
+├── 2_视频转字幕并翻译.bat
 ├── 3_只翻译SRT.bat
 ├── 4_只润色SRT.bat
 ├── src/
@@ -86,7 +118,7 @@ translate/
 │   │   ├── cues.py              # 时间轴、cue、SRT/TXT
 │   │   ├── engine.py            # 识别主流程
 │   │   ├── ffmpeg.py            # ffmpeg 查找
-│   │   ├── keys.py              # OpenRouter 密钥
+│   │   ├── keys.py              # 识别 API Key
 │   │   └── cli.py               # 命令行
 │   ├── asr2srt.py               # 识别命令行入口（实现在 asr.cli）
 │   ├── workflow.py              # ASR → 翻译的串联入口
@@ -113,10 +145,27 @@ translate/
 ├── tests/
 ├── temp/                        # 运行临时文件，可随时删除
 ├── tools/                       # 手动放置或打包时加入的 ffmpeg（不提交）
-├── config.toml                  # 本地配置（密钥已移到 .env）
-├── config.toml.example
+├── config.toml                  # 本地配置（不提交）
+├── config.common.toml           # 默认配置（MiMo + DeepSeek）
+├── config.toml.example          # 完整参数参考
 └── .env                         # 密钥，不要提交
 ```
+
+## 从源码运行
+
+不用便携包时，需要本机 Python 3.11+ 和 ffmpeg。在项目根目录执行：
+
+```powershell
+py -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+```
+
+启动器会优先使用 `runtime\python`，没有时回退到 `.venv\Scripts\python.exe`。
+API 配置与便携版相同：翻译密钥写到 `.env` 的 `LLM_API_KEY`，识别 Key 在首次运行时输入。
+源码运行时先把 `config.common.toml` 复制为 `config.toml`（需要完整参数时用
+`config.toml.example`）。
+
+详细步骤见 [安装与配置](docs/install.md)。
 
 ## 开发
 

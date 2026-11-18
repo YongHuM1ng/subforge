@@ -2,6 +2,7 @@
 *.env
 config*.toml
 !config.toml.example
+!config.common.toml
 
 # Python
 .venv/

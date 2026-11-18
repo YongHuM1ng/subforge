@@ -6,7 +6,7 @@
 - Python 3.11 或更高
 - `ffmpeg`（识别阶段用于抽音轨、探测音频流和检测静音；便携版分自带 ffmpeg 和手动放置两种）
 - 一个 OpenAI-compatible Chat Completions 服务（翻译用）
-- 一个 OpenRouter API Key（识别用）
+- 一个识别服务 API Key（默认小米 MiMo）
 
 ## 便携包（Windows 10/11 x64，不用安装 Python）
 
@@ -26,7 +26,9 @@
 解压后直接双击启动器。便携包内置 `runtime\python`，启动器会优先使用它；
 源码开发环境没有 `runtime` 时自动回退到 `.venv\Scripts\python.exe`。
 
-第一次识别会提示输入 OpenRouter Key；翻译前需要编辑 `config.toml` 的 `[api]` 段。
+第一次识别会提示输入识别服务的 Key；默认是小米 MiMo，换其他服务见下文
+“OpenAI-compatible ASR”。
+翻译前需要编辑 `config.toml` 的 `[api]` 段。
 
 ## 安装
 
@@ -70,20 +72,32 @@ GitHub Releases 提供两种便携包：
 
 | 包 | 说明 |
 |---|---|
-| `SubForge-<版本>-portable.zip` | 不含 ffmpeg，需要安装到 PATH 或放到上面的目录 |
-| `SubForge-<版本>-portable-ffmpeg.zip` | 自带 LGPL 构建的 ffmpeg，解压即用 |
+| `SubForge-<版本>-windows-x64-portable.zip` | 不含 ffmpeg，需要安装到 PATH 或放到上面的目录 |
+| `SubForge-<版本>-windows-x64-portable-ffmpeg.zip` | 自带 LGPL 构建的 ffmpeg，解压即用 |
 
 源码运行时不自动下载 ffmpeg。附带版中 ffmpeg 的来源、许可证和可替换说明见
 `tools\ffmpeg\NOTICE.txt`。
+
+## 常用配置
+
+便携包里的 `config.toml` 默认使用 **小米 MiMo 识别 + DeepSeek 官方翻译**，只列出
+最常用项：翻译接口、ASR 预设、目标语言、润色开关和思考等级；没有列出的参数使用
+默认值，通常不需要修改。
+
+- 换翻译服务：改 `config.toml` 的 `[api]`，Key 写到 `.env` 的 `LLM_API_KEY`。
+- 需要完整参数：见包内 `docs/config-reference.toml`，或仓库里的 `config.toml.example`。
 
 ## 两个 Key
 
 | 用途 | 存放位置 | 环境变量（可选） |
 |---|---|---|
-| ASR（OpenRouter） | 项目根目录 `.env` 的 `OPENROUTER_API_KEY` | `OPENROUTER_API_KEY` |
-| 翻译 | 项目根目录 `.env` 的 `LLM_API_KEY` | `LLM_API_KEY` |
+| ASR（默认小米 MiMo） | 项目根目录 `.env` 的 `ASR_API_KEY` | `ASR_API_KEY` |
+| 翻译（默认 DeepSeek） | 项目根目录 `.env` 的 `LLM_API_KEY` | `LLM_API_KEY` |
 
 - ASR 第一次运行时会在控制台提示粘贴 Key，输入时不显示，并自动写入 `.env`。
+- DeepSeek Key 在 [platform.deepseek.com/api_keys](https://platform.deepseek.com/api_keys) 创建。
+- 换用其他识别服务时，默认仍然从 `.env` 的 `ASR_API_KEY` 读 Key，只需要换 Key 的值；
+  如需使用别的变量名，再改 `[asr] api_key_env`。
 - 翻译工具启动时会自动读取项目根目录的 `.env`；已存在的环境变量优先。
 - `.env` 和 `config.toml` 都已加入 `.gitignore`，不要对外发送或提交。
 - 密钥建议只放在 `.env`，`config.toml` 的 `[api] api_key` 留空。
@@ -92,12 +106,51 @@ GitHub Releases 提供两种便携包：
 
 ## 识别配置（[asr]）
 
-`asr2srt.py` 和 `workflow.py` 会读取 `config.toml` 的 `[asr]` 段；不写则使用默认值：
+`asr2srt.py` 和 `workflow.py` 会读取 `config.toml` 的 `[asr]` 段；不写则使用默认值。
+
+### 预设
+
+最常用的写法是在 `[asr]` 只写一个 `preset`：
+
+| preset | 说明 |
+|---|---|
+| `mimo` | 便携包默认，小米 MiMo 的 Chat Completions ASR |
+| `openrouter` | OpenRouter 的 JSON 音频转写接口 |
+| `openai` | 标准 OpenAI `/audio/transcriptions`（multipart，`whisper-1`） |
+
+所有预设默认都从 `.env` 的 `ASR_API_KEY` 读取 Key；切换 preset 时只需要换 Key 的值。
 
 ```toml
 [asr]
+preset = "mimo"
+# 需要覆盖预设时直接写字段，例如：
+# language = "ja"
+# model = "..."
+```
+
+显式写出的字段会覆盖预设，其余参数继续使用预设/默认值。
+
+下面是完整字段参考：
+
+```toml
+[asr]
+# 预设：openrouter / openai / mimo；下面的显式字段会覆盖预设
+preset = "openrouter"
 api_url = "https://openrouter.ai/api/v1/audio/transcriptions"
 model = "microsoft/mai-transcribe-2"
+# transcriptions = OpenRouter JSON；openai_transcriptions = OpenAI multipart；
+# chat_completions = 音频放进 messages
+protocol = "transcriptions"
+# 从 .env 读取 Key 的变量名；换服务时一起改
+api_key_env = "ASR_API_KEY"
+# 鉴权头和前缀：OpenRouter 用 Authorization + "Bearer "
+api_key_header = "Authorization"
+api_key_prefix = "Bearer "
+# 仅 chat_completions：data_url = "data:audio/wav;base64,..."（MiMo）；
+# base64 = 纯 base64 + format = "wav"（OpenAI 标准）
+audio_format = "data_url"
+# 仅 chat_completions：写入 asr_options.language；留空不发送
+language = ""
 workers = 8
 jobs = 1
 min_chunk = 20.0
@@ -118,7 +171,49 @@ timestamps = "word"
 # proxy = "http://127.0.0.1:7890"
 ```
 
-环境变量 `ASR_API_URL` / `ASR_MODEL` / `ASR_WORKERS` / `ASR_PROXY` / `ASR_TIMESTAMPS` 优先级更高。
+环境变量 `ASR_PRESET` / `ASR_API_URL` / `ASR_MODEL` / `ASR_PROTOCOL` /
+`ASR_API_KEY_ENV` / `ASR_API_KEY_HEADER` / `ASR_API_KEY_PREFIX` / `ASR_AUDIO_FORMAT` /
+`ASR_LANGUAGE` / `ASR_WORKERS` / `ASR_PROXY` / `ASR_TIMESTAMPS` 优先级更高。
+
+### OpenAI-compatible ASR（Chat Completions）
+
+便携包默认就是小米 MiMo；单独写预设时只需要：
+
+```toml
+[asr]
+preset = "mimo"
+```
+
+然后在 `.env` 写入：
+
+```ini
+ASR_API_KEY=你的Key
+```
+
+需要覆盖预设时，在同一段里写字段即可：
+
+```toml
+[asr]
+preset = "mimo"
+language = "ja"      # 覆盖预设的 zh
+# model = "..."      # 换模型
+```
+
+自定义其他服务时，用 `preset = "openrouter"`（或不写 `preset`）作为基底，
+覆盖需要的字段：
+
+| 字段 | 说明 |
+|---|---|
+| `protocol` | `transcriptions`（OpenRouter JSON）、`openai_transcriptions`（OpenAI multipart）或 `chat_completions`（音频放进 `messages`） |
+| `api_url` / `model` | 服务商的完整地址和模型名 |
+| `api_key_env` | 从 `.env` / 环境变量读取哪个变量作为 Key |
+| `api_key_header` / `api_key_prefix` | 鉴权头和前缀；MiMo 用 `api-key` + 空字符串 |
+| `audio_format` | `data_url`（`data:audio/wav;base64,...`）或 `base64`（纯 base64 + `format: wav`） |
+| `language` | 仅 `chat_completions`，写入 `asr_options.language`；不用就留空 |
+
+- `timestamps`：`chat_completions` 只返回文本，会强制按 `none` 处理，使用
+  `fallback_chunk` 定长切片。把 `fallback_chunk` 调小可以减少单个请求的体积。
+- 标准 OpenAI 转写：`[asr] preset = "openai"`，把 OpenAI Key 写进 `.env` 的 `ASR_API_KEY`。
 
 翻译侧的 `config.toml` 在启动时会校验：数值超出范围、布尔值写成带引号的字符串、
 `structured_output` / `translation_fidelity` 取值不合法时直接报错并列出全部问题；
@@ -126,7 +221,13 @@ timestamps = "word"
 
 ## 翻译配置
 
-从模板复制：
+从常用模板开始：
+
+```powershell
+Copy-Item .\config.common.toml .\config.toml
+```
+
+需要完整参数参考时，从 `config.toml.example` 复制：
 
 ```powershell
 Copy-Item .\config.toml.example .\config.toml
@@ -142,10 +243,12 @@ model = "gpt-4o-mini"
 api_key = ""
 timeout = 120
 retries = 2
-# json_schema：严格 JSON Schema（推荐，但部分代理不支持）
-# json_object：兼容性更好
+# json_schema：更严格，但部分服务不支持
+# json_object：兼容性更好（默认）
 # none：不发送 response_format
 structured_output = "json_object"
+# 思考等级（DeepSeek 等支持）：none / low / medium / high / max；留空不发送
+reasoning_effort = ""
 # system = 使用系统代理（无则直连，默认）；none = 从不走代理；也可填 http://host:port
 proxy = "system"
 ```
@@ -156,7 +259,7 @@ proxy = "system"
 [translation]
 source = "自动识别"
 target = "简体中文"
-polish = true
+polish = false   # 默认关闭；需要二次润色时改 true
 ```
 
 `[processing]`：
