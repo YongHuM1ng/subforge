@@ -320,7 +320,8 @@ def main() -> int:
     model = args.model or api["model"]
     api_key = api["api_key"] or os.getenv("LLM_API_KEY")
     if not api_key:
-        parser.error("请在项目根目录 .env 设置 LLM_API_KEY（或设置同名环境变量 / 在 config.toml 设置 api_key）")
+        parser.error("请在项目根目录 .env 设置 LLM_API_KEY"
+                     "（或设置同名环境变量 / 在 config.toml 设置 api_key）")
     reporter = Reporter(quiet=args.quiet)
     try:
         base = load_track(Path(args.input), parser)
@@ -392,6 +393,7 @@ def main() -> int:
             api["structured_output"],
             args.debug_api,
             args.proxy or api["proxy"],
+            reasoning_effort=api["reasoning_effort"],
         )
 
         # ---- 任务概览 ----

@@ -11,13 +11,14 @@ DEFAULT_CONFIG = {
         "api_key": "",
         "timeout": 120,
         "retries": 3,
-        "structured_output": "json_schema",
+        "structured_output": "json_object",
+        "reasoning_effort": "",
         "proxy": "system",
     },
     "translation": {
         "source": "自动识别",
         "target": "简体中文",
-        "polish": True,
+        "polish": False,
         "pause_before_polish": False,
         "natural_segmentation": True,
         "translation_fidelity": "natural",
@@ -61,8 +62,11 @@ BOOLEANS = {
 
 STRINGS = {
     ("api", "endpoint"), ("api", "model"), ("api", "api_key"), ("api", "proxy"),
+    ("api", "reasoning_effort"),
     ("translation", "source"), ("translation", "target"), ("prompts", "additional"),
 }
+
+REASONING_EFFORTS = {"", "none", "low", "medium", "high", "max"}
 
 MODEL_KEYS = (
     "analysis", "translation", "polish",
@@ -127,6 +131,10 @@ def validate_config(config: dict[str, Any]) -> dict[str, Any]:
         value = get(section, key)
         if not isinstance(value, str):
             errors.append(f"{section}.{key} 必须是字符串（当前 {value!r}）")
+    effort = get("api", "reasoning_effort")
+    if isinstance(effort, str) and effort.strip().lower() not in REASONING_EFFORTS:
+        errors.append("api.reasoning_effort 只能是 none / low / medium / high / max，"
+                      f"留空表示不发送（当前 {effort!r}）")
     models = config.get("models")
     if isinstance(models, dict):
         for key in ("fallback", *MODEL_KEYS):

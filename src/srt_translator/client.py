@@ -99,9 +99,11 @@ def looks_like_moderation(status: int, body: str) -> bool:
 
 class LLMClient:
     def __init__(self, endpoint: str, api_key: str, model: str, timeout: int = 120, retries: int = 3,
-                 structured_output: str = "json_schema", debug: bool = False, proxy: str = "system"):
+                 structured_output: str = "json_object", debug: bool = False, proxy: str = "system",
+                 reasoning_effort: str = ""):
         self.endpoint, self.api_key, self.model = endpoint, api_key, model
         self.timeout, self.retries, self.structured_output, self.debug = timeout, retries, structured_output, debug
+        self.reasoning_effort = (reasoning_effort or "").strip().lower()
         self.proxy = resolve_proxy(endpoint, proxy)
         self._session: aiohttp.ClientSession | None = None
         self.usage: dict[str, float] = {}
@@ -165,6 +167,11 @@ class LLMClient:
                 "name": "subtitle_response", "strict": True, "schema": schema}}
         elif mode == "json_object":
             body["response_format"] = {"type": "json_object"}
+        if self.reasoning_effort == "none":
+            # DeepSeek Chat Completions：显式关闭思考；其他服务不认这个字段时会报错。
+            body["thinking"] = {"type": "disabled"}
+        elif self.reasoning_effort:
+            body["reasoning_effort"] = self.reasoning_effort
         return body
 
     def _accumulate_usage(self, usage: Any) -> None:

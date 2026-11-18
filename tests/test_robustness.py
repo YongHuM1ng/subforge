@@ -49,6 +49,7 @@ class ConfigValidationTest(unittest.TestCase):
             {"processing": {"max_workers": "3"}},
             {"translation": {"polish": "false"}},
             {"api": {"structured_output": "json"}},
+            {"api": {"reasoning_effort": "turbo"}},
         ]
         for case in cases:
             with self.subTest(case=case), self.assertRaises(ValueError) as ctx:

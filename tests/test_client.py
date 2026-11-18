@@ -54,9 +54,10 @@ class _UnsupportedFormatHandler(BaseHTTPRequestHandler):
 
 
 class ClientBodyTest(unittest.TestCase):
-    def make(self, mode: str) -> LLMClient:
+    def make(self, mode: str, reasoning_effort: str = "") -> LLMClient:
         return LLMClient("http://127.0.0.1:9/v1/chat/completions", "k", "m",
-                         structured_output=mode, proxy="none")
+                         structured_output=mode, proxy="none",
+                         reasoning_effort=reasoning_effort)
 
     def test_schema_mode(self):
         body = self.make("json_schema")._build_body("s", "u", TRANSLATION_SCHEMA, "json_schema")
@@ -74,6 +75,21 @@ class ClientBodyTest(unittest.TestCase):
     def test_model_override(self):
         body = self.make("none")._build_body("s", "u", None, "none", "stage-model")
         self.assertEqual(body["model"], "stage-model")
+
+    def test_reasoning_effort_is_sent(self):
+        body = self.make("none", "low")._build_body("s", "u", None, "none")
+        self.assertEqual(body["reasoning_effort"], "low")
+        self.assertNotIn("thinking", body)
+
+    def test_reasoning_effort_none_disables_thinking(self):
+        body = self.make("none", "none")._build_body("s", "u", None, "none")
+        self.assertEqual(body["thinking"], {"type": "disabled"})
+        self.assertNotIn("reasoning_effort", body)
+
+    def test_reasoning_effort_empty_is_omitted(self):
+        body = self.make("none")._build_body("s", "u", None, "none")
+        self.assertNotIn("reasoning_effort", body)
+        self.assertNotIn("thinking", body)
 
     def test_looks_like_moderation(self):
         self.assertTrue(looks_like_moderation(400, '{"error":{"message":"content_policy_violation"}}'))
