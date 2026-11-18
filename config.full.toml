@@ -1,0 +1,69 @@
+# SubForge 完整配置
+#
+# 用法：把本文件复制为 config.toml 即可。
+# 默认值与简易的 config.toml 完全一致；程序只读取 config.toml，不会自动读取本文件。
+#
+# 默认：小米 MiMo 识别 + DeepSeek 官方翻译。
+# .env: ASR_API_KEY / LLM_API_KEY
+
+[api]
+endpoint = "https://api.deepseek.com/chat/completions"
+model = "deepseek-flash"
+api_key = ""
+timeout = 120
+retries = 3
+structured_output = "json_object"
+reasoning_effort = "low"
+proxy = "system"
+
+[asr]
+preset = "mimo"
+protocol = "chat_completions"
+api_url = "https://api.xiaomimimo.com/v1/chat/completions"
+model = "mimo-v2.5-asr"
+api_key_env = "ASR_API_KEY"
+api_key_header = "api-key"
+api_key_prefix = ""
+audio_format = "data_url"
+language = "zh"
+workers = 8
+jobs = 1
+min_chunk = 20.0
+max_chunk = 60.0
+target_chunk = 45.0
+silence_noise = "-32dB"
+silence_min = 0.35
+fallback_chunk = 15.0
+line_width = 42
+max_lines = 2
+min_cue = 1.0
+max_cue = 7.0
+min_gap = 0.06
+price_per_hour = 0.10
+timestamps = "none"
+proxy = "system"
+
+[translation]
+source = "自动识别"
+target = "简体中文"
+polish = false
+pause_before_polish = false
+natural_segmentation = true
+translation_fidelity = "natural"
+
+[prompts]
+additional = ""
+
+[processing]
+batch_size = 20
+context = 3
+global_analysis = true
+max_workers = 2
+
+[models]
+fallback_enabled = true
+fallback = ""
+# 可选：按阶段覆盖模型
+# analysis = "..."
+# translation = "..."
+# polish = "..."

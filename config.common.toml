@@ -6,7 +6,7 @@
 #   LLM_API_KEY=...          # DeepSeek 的 Key
 #
 # 这里只列常用项；没写的参数使用默认值。
-# 完整参数参考：docs/config-reference.toml（便携包）或 config.toml.example（源码）。
+# 完整参数见 config.full.toml（复制覆盖本文件后行为不变）。
 
 [api]
 # 翻译服务：DeepSeek 官方 OpenAI-compatible Chat Completions
@@ -17,11 +17,18 @@ model = "deepseek-flash"
 reasoning_effort = "low"
 
 [asr]
-# 预设：openrouter / openai / mimo
+# 默认：小米 MiMo
 preset = "mimo"
-# 需要覆盖预设时直接加字段，例如：
-# language = "ja"
-# model = "..."
+
+# 想改用 OpenRouter：注释掉上面的 [asr] 块，取消下面的注释。
+# [asr]
+# protocol = "transcriptions"
+# api_url = "https://openrouter.ai/api/v1/audio/transcriptions"
+# model = "microsoft/mai-transcribe-2"
+# api_key_env = "ASR_API_KEY"
+# api_key_header = "Authorization"
+# api_key_prefix = "Bearer "
+# timestamps = "word"
 
 [translation]
 # 目标语言

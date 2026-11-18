@@ -38,7 +38,7 @@
      可选 `none` / `low` / `medium` / `high` / `max`。
    - 翻译换其他服务：改 `config.toml` 的 `[api]` endpoint / model，把该服务的 Key
      写到 `LLM_API_KEY`。
-   - 完整参数参考：`docs/config-reference.toml`。
+   - 想要完整参数：用 `config.full.toml` 覆盖 `config.toml`；默认值完全相同，行为不变。
 
    `.env` 和 `config.toml` 里可能有密钥，不要发给别人，也不要提交到 GitHub。
 3. **拖入文件**：把视频拖到 `2_视频转字幕并翻译.bat`（识别 + 翻译），或
@@ -147,7 +147,7 @@ SubForge/
 ├── tools/                       # 手动放置或打包时加入的 ffmpeg（不提交）
 ├── config.toml                  # 本地配置（不提交）
 ├── config.common.toml           # 默认配置（MiMo + DeepSeek）
-├── config.toml.example          # 完整参数参考
+├── config.full.toml             # 完整参数（默认值与 config.toml 相同）
 └── .env                         # 密钥，不要提交
 ```
 
@@ -163,7 +163,7 @@ py -m venv .venv
 启动器会优先使用 `runtime\python`，没有时回退到 `.venv\Scripts\python.exe`。
 API 配置与便携版相同：翻译密钥写到 `.env` 的 `LLM_API_KEY`，识别 Key 在首次运行时输入。
 源码运行时先把 `config.common.toml` 复制为 `config.toml`（需要完整参数时用
-`config.toml.example`）。
+`config.full.toml`）。
 
 详细步骤见 [安装与配置](docs/install.md)。
 

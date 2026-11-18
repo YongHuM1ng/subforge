@@ -108,7 +108,7 @@ if line.strip().startswith("ASR_API_KEY"):
 
 ### 2.6 `[models] options` 是死配置
 
-`config.toml.example` 和 `docs/install.md` 都教用户配置：
+`config.full.toml` 和 `docs/install.md` 都教用户配置：
 
 ```toml
 [models]
@@ -251,9 +251,9 @@ select = ["E", "F", "I", "UP", "B"]   # F401 会立刻抓出 3.3 的两个无用
 | `troubleshooting.md` | 测试覆盖清单缺 3 个新文件；第 4 点「新增语言时」那段混用了英文逗号 |
 | `naming.md` | 说识别产物由 `asr2srt.py` 生成，实际在 `asr/engine.py` |
 | `README.md` | 把 `asr2srt.py` 同时描述为「兼容入口（重新导出 asr 包）」和「命令行入口」，读者会困惑该用哪个 |
-| `config.toml` vs `config.toml.example` | 本地配置缺 `[asr]` 整段；多了 `pause_before_polish`；`translation_fidelity` 一个 `creative` 一个 `natural` |
+| `config.toml` vs `config.full.toml` | 本地配置缺 `[asr]` 整段；多了 `pause_before_polish`；`translation_fidelity` 一个 `creative` 一个 `natural` |
 
-建议：`config.toml.example` 的段落用测试断言校验（读 example，断言 `load_asr_config` / `load_config` 能解析出预期字段），防止继续漂移。
+建议：`config.full.toml` 的段落用测试断言校验（读 example，断言 `load_asr_config` / `load_config` 能解析出预期字段），防止继续漂移。
 
 ---
 
@@ -291,7 +291,7 @@ select = ["E", "F", "I", "UP", "B"]   # F401 会立刻抓出 3.3 的两个无用
 - 分支 `chore/remove-webui`，19 个未提交改动（`translate_srt.py` 增加 267 行最多）
 - 测试全绿：71 passed / 2.445s
 - `temp/` 目录 1.4 MB，已在 `.gitignore` 中，不会被提交
-- `.env` 与 `config.toml` 均未被 git 跟踪（`git ls-files` 确认）；`config.toml.example` 里是干净的公网地址，没有泄漏私有 endpoint
+- `.env` 与 `config.toml` 均未被 git 跟踪（`git ls-files` 确认）；`config.full.toml` 里是干净的公网地址，没有泄漏私有 endpoint
 
 ---
 

@@ -1,8 +1,8 @@
 # 密钥与本地配置（不要提交）
 *.env
 config*.toml
-!config.toml.example
 !config.common.toml
+!config.full.toml
 
 # Python
 .venv/

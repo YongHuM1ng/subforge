@@ -101,14 +101,16 @@ def main(argv: list[str]) -> int:
     args = parser.parse_args(argv)
 
     if not CONFIG.exists():
-        example = ROOT / "config.toml.example"
+        example = ROOT / "config.common.toml"
+        if not example.exists():
+            example = ROOT / "config.full.toml"
         if example.exists():
             shutil.copyfile(example, CONFIG)
             emit(f"[提示] 已从 {example.name} 创建 config.toml，请填写 API 配置后重新运行。",
                  file=sys.stderr)
             return 2
         emit(f"[错误] 找不到配置文件：{CONFIG}", file=sys.stderr)
-        print("请复制 config.toml.example 为 config.toml 并填写。", file=sys.stderr)
+        print("请复制 config.common.toml 为 config.toml 并填写。", file=sys.stderr)
         return 2
 
     if args.mode == "translate":

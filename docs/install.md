@@ -85,7 +85,7 @@ GitHub Releases 提供两种便携包：
 默认值，通常不需要修改。
 
 - 换翻译服务：改 `config.toml` 的 `[api]`，Key 写到 `.env` 的 `LLM_API_KEY`。
-- 需要完整参数：见包内 `docs/config-reference.toml`，或仓库里的 `config.toml.example`。
+- 需要完整参数：用 `config.full.toml` 覆盖 `config.toml`；默认值完全相同。
 
 ## 两个 Key
 
@@ -227,10 +227,10 @@ language = "ja"      # 覆盖预设的 zh
 Copy-Item .\config.common.toml .\config.toml
 ```
 
-需要完整参数参考时，从 `config.toml.example` 复制：
+需要完整参数参考时，从 `config.full.toml` 复制：
 
 ```powershell
-Copy-Item .\config.toml.example .\config.toml
+Copy-Item .\config.full.toml .\config.toml
 notepad .\config.toml
 ```
 

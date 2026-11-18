@@ -6,25 +6,42 @@ from pathlib import Path
 from unittest.mock import patch
 
 from asr.config import ASR_DEFAULTS, load_asr_config
+from srt_translator.config import load_config
 
 ROOT = Path(__file__).resolve().parents[1]
 
 
 class ConfigExampleTest(unittest.TestCase):
-    def test_example_uses_known_asr_fields(self):
-        data = tomllib.loads((ROOT / "config.toml.example").read_text(encoding="utf-8"))
+    def test_full_config_uses_known_asr_fields(self):
+        data = tomllib.loads((ROOT / "config.full.toml").read_text(encoding="utf-8"))
         self.assertLessEqual(set(data["asr"]), set(ASR_DEFAULTS))
         self.assertIn("pause_before_polish", data["translation"])
         self.assertNotIn("options", data.get("models", {}))
         self.assertIn("fallback_enabled", data["models"])
         self.assertIn("fallback", data["models"])
 
-    def test_example_loads(self):
+    def test_full_config_loads(self):
         with patch.dict(os.environ, {"ASR_MODEL": "", "ASR_PROXY": ""}):
-            values = load_asr_config(ROOT / "config.toml.example",
+            values = load_asr_config(ROOT / "config.full.toml",
                                      ROOT / "tests" / "nonexistent.env")
-        self.assertEqual(values["model"], ASR_DEFAULTS["model"])
+        self.assertEqual(values["model"], "mimo-v2.5-asr")
         self.assertIn("proxy", values)
+
+    def test_full_and_common_configs_resolve_identically(self):
+        env = {"ASR_PRESET": "", "ASR_PROTOCOL": "", "ASR_API_KEY_ENV": "",
+               "ASR_AUDIO_FORMAT": "", "ASR_LANGUAGE": "", "ASR_MODEL": "",
+               "ASR_API_URL": ""}
+        with patch.dict(os.environ, env):
+            common_asr = load_asr_config(ROOT / "config.common.toml",
+                                         ROOT / "tests" / "nonexistent.env")
+            full_asr = load_asr_config(ROOT / "config.full.toml",
+                                       ROOT / "tests" / "nonexistent.env")
+        self.assertEqual(common_asr, full_asr)
+        common = load_config(ROOT / "config.common.toml")
+        full = load_config(ROOT / "config.full.toml")
+        common.pop("asr", None)
+        full.pop("asr", None)
+        self.assertEqual(common, full)
 
     def test_asr_proxy_falls_back_to_api_section(self):
         with tempfile.TemporaryDirectory() as folder:
