@@ -33,6 +33,9 @@
 |---|---|
 | `SubForge-<版本>-windows-x64-portable.zip` | 不含 ffmpeg，需要安装到 PATH 或放到 `tools\ffmpeg\bin` |
 | `SubForge-<版本>-windows-x64-portable-ffmpeg.zip` | 自带 LGPL 构建的 ffmpeg，解压即用 |
+| `SubForge-<版本>-windows-x64-portable-ffmpeg.7z` | 同上，约 45 MB；Windows 10 需用 7-Zip 解压 |
+
+不带 ffmpeg 的版本只提供 zip。
 
 解压后双击启动器即可。首次识别会提示输入 OpenRouter Key；翻译前编辑 `config.toml`
 的 `[api]` 段。便携包使用 `runtime\python`，不需要本机安装 Python。

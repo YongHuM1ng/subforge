@@ -16,6 +16,9 @@
 |---|---|
 | `SubForge-<版本>-windows-x64-portable.zip` | 不含 ffmpeg，需要安装到 PATH 或放到 `tools\ffmpeg\bin` |
 | `SubForge-<版本>-windows-x64-portable-ffmpeg.zip` | 自带 LGPL 构建的 ffmpeg，解压即用 |
+| `SubForge-<版本>-windows-x64-portable-ffmpeg.7z` | 同上，体积更小；Windows 10 需用 7-Zip 解压 |
+
+不带 ffmpeg 的版本只提供 zip。
 
 便携包只支持 64 位 Windows：内置的是 Windows amd64 embeddable Python 和 win64
 静态 ffmpeg。32 位 Windows、ARM64、Linux、macOS 不能直接运行。

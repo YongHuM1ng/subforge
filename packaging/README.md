@@ -4,13 +4,16 @@
 产物不能直接用于 32 位 Windows、ARM64、Linux 或 macOS。
 
 ```powershell
-.\.venv\Scripts\python.exe packaging\build_portable.py --variant both
+.\.venv\Scripts\python.exe packaging\build_portable.py --variant both --seven-zip
 ```
 
 产物在 `dist\`：
 
 - `SubForge-<版本>-windows-x64-portable.zip`：不带 ffmpeg，用户自行安装或放到 `tools\ffmpeg\bin`
 - `SubForge-<版本>-windows-x64-portable-ffmpeg.zip`：附带 ffmpeg，解压即用
+- `SubForge-<版本>-windows-x64-portable-ffmpeg.7z`：同上，体积更小；需要 `--seven-zip` 且本机装有 7-Zip
+
+不带 ffmpeg 的版本只发 zip。7z 只用于压缩 `ffmpeg.exe`，Windows 10 需要 7-Zip 才能解压。
 
 `--variant base` 或 `--variant ffmpeg` 可以只构建其中一个；`--refresh` 会重新下载
 Python、aiohttp 轮子和 ffmpeg。
@@ -50,7 +53,9 @@ autobuild-2026-11-17-12-40 / ffmpeg-n8.1.3-35-gf1acb0a266-win64-lgpl-8.1.zip
 ```powershell
 git tag v0.1.1
 git push origin v0.1.1
-gh release create v0.1.1 dist\SubForge-0.1.1-windows-x64-portable.zip dist\SubForge-0.1.1-windows-x64-portable-ffmpeg.zip `
+gh release create v0.1.1 dist\SubForge-0.1.1-windows-x64-portable.zip `
+  dist\SubForge-0.1.1-windows-x64-portable-ffmpeg.zip `
+  dist\SubForge-0.1.1-windows-x64-portable-ffmpeg.7z `
   --title "SubForge 0.1.1" --notes "便携版：只依赖单个 ffmpeg.exe"
 ```
 

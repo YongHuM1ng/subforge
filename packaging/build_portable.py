@@ -1,11 +1,13 @@
 """构建 SubForge 的 Windows 免安装便携包。
 
 用法：
-    .venv\\Scripts\\python.exe packaging\\build_portable.py --variant both
+    .venv\\Scripts\\python.exe packaging\\build_portable.py --variant both --seven-zip
 
 产物（dist/）：
     SubForge-<版本>-windows-x64-portable.zip         不带 ffmpeg，需手动放置或安装
     SubForge-<版本>-windows-x64-portable-ffmpeg.zip  自带 ffmpeg（LGPL 构建）
+    加 --seven-zip 时，附带 ffmpeg 的版本会同时生成同名 .7z（需要安装 7-Zip；
+    Windows 10 不自带 7z 解压）。不带 ffmpeg 的版本只发 zip。
 
 仅支持 64 位 Windows 10/11：便携包内置的是 Windows amd64 embeddable Python 和
 win64 静态 ffmpeg，不能在 32 位 Windows、ARM64、Linux 或 macOS 上直接运行。
@@ -282,10 +284,39 @@ def zip_package(staging: Path, target: Path) -> None:
     log(f"[完成] {target}  ({target.stat().st_size / 1048576:.1f} MB)")
 
 
-def build_variant(version: str, with_ffmpeg: bool, out_dir: Path) -> Path:
+def find_7z() -> str | None:
+    for name in ("7z", "7za"):
+        found = shutil.which(name)
+        if found:
+            return found
+    for candidate in (r"C:\Program Files\7-Zip\7z.exe",
+                      r"C:\Program Files (x86)\7-Zip\7z.exe"):
+        if Path(candidate).exists():
+            return candidate
+    return None
+
+
+def make_7z(staging: Path, target: Path) -> Path | None:
+    exe = find_7z()
+    if not exe:
+        log("[跳过] 未找到 7-Zip，无法生成 .7z（安装 7-Zip 后加 --seven-zip 重试）")
+        return None
+    log(f"[构建] 打包 {target.name}…")
+    subprocess.run(
+        [exe, "a", "-t7z", "-mx=9", "-mmt=on", "-y",
+         str(target.resolve()), "SubForge"],
+        cwd=staging.parent, check=True, stdout=subprocess.DEVNULL,
+    )
+    log(f"[完成] {target}  ({target.stat().st_size / 1048576:.1f} MB)")
+    return target
+
+
+def build_variant(version: str, with_ffmpeg: bool, out_dir: Path,
+                  seven_zip: bool = False) -> list[Path]:
     suffix = "portable-ffmpeg" if with_ffmpeg else "portable"
-    target = out_dir / f"SubForge-{version}-windows-x64-{suffix}.zip"
-    staging = out_dir / ".build" / suffix
+    base = f"SubForge-{version}-windows-x64-{suffix}"
+    target = out_dir / f"{base}.zip"
+    staging = out_dir / ".build" / "SubForge"
     if staging.exists():
         shutil.rmtree(staging)
     staging.mkdir(parents=True)
@@ -299,8 +330,13 @@ def build_variant(version: str, with_ffmpeg: bool, out_dir: Path) -> Path:
         expected = sha256(archive)
         install_ffmpeg(staging, archive, expected)
     zip_package(staging, target)
+    built = [target]
+    if seven_zip and with_ffmpeg:
+        archive_7z = make_7z(staging, out_dir / f"{base}.7z")
+        if archive_7z:
+            built.append(archive_7z)
     shutil.rmtree(staging, ignore_errors=True)
-    return target
+    return built
 
 
 def main() -> int:
@@ -309,6 +345,8 @@ def main() -> int:
                         help="base=不带 ffmpeg；ffmpeg=附带 ffmpeg；both=两个都构建")
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT, help="输出目录")
     parser.add_argument("--refresh", action="store_true", help="重新下载缓存的 Python/依赖/ffmpeg")
+    parser.add_argument("--seven-zip", action="store_true",
+                        help="为附带 ffmpeg 的版本同时生成 .7z（Windows 10 需要 7-Zip 解压）")
     args = parser.parse_args()
 
     with (ROOT / "pyproject.toml").open("rb") as file:
@@ -319,10 +357,10 @@ def main() -> int:
     ensure_wheels(args.refresh)
     built = []
     if args.variant in ("base", "both"):
-        built.append(build_variant(version, False, args.out))
+        built.extend(build_variant(version, False, args.out, args.seven_zip))
     if args.variant in ("ffmpeg", "both"):
         ensure_ffmpeg_archive(args.refresh)
-        built.append(build_variant(version, True, args.out))
+        built.extend(build_variant(version, True, args.out, args.seven_zip))
 
     log("\n[完成] 产物：")
     for path in built:
